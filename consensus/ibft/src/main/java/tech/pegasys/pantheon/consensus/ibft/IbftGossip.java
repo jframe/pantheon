@@ -39,20 +39,16 @@ public class IbftGossip {
   // Set that starts evicting members when it hits capacity
   private final Set<Signature> seenMessages;
 
-  IbftGossip(final ValidatorMulticaster multicaster, final int maxSeenMessages) {
-    // Size of the seenMessages cache, should end up utilising 65bytes * this number + some meta
-    // data
-    this.multicaster = multicaster;
-    seenMessages = newSetFromMap(new EvictingMap<>(maxSeenMessages));
-  }
-
   /**
    * Constructor that attaches gossip logic to a set of multicaster
    *
    * @param multicaster Network connections to the remote validators
+   * @param maxSeenMessages Maximum number of messages to track as being seen
    */
-  public IbftGossip(final ValidatorMulticaster multicaster) {
-    this(multicaster, 10_000);
+  public IbftGossip(final ValidatorMulticaster multicaster, final int maxSeenMessages) {
+    this.multicaster = multicaster;
+    // Size of the seenMessages cache should end up utilising 65bytes * this number + some metadata
+    seenMessages = newSetFromMap(new MaxSizeEvictingMap<>(maxSeenMessages));
   }
 
   /**

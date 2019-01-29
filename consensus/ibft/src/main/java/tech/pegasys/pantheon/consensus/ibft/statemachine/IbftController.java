@@ -15,8 +15,8 @@ package tech.pegasys.pantheon.consensus.ibft.statemachine;
 import static java.util.Collections.emptyList;
 
 import tech.pegasys.pantheon.consensus.ibft.ConsensusRoundIdentifier;
-import tech.pegasys.pantheon.consensus.ibft.EvictingMap;
 import tech.pegasys.pantheon.consensus.ibft.IbftGossip;
+import tech.pegasys.pantheon.consensus.ibft.MaxSizeEvictingMap;
 import tech.pegasys.pantheon.consensus.ibft.ibftevent.BlockTimerExpiry;
 import tech.pegasys.pantheon.consensus.ibft.ibftevent.IbftReceivedMessageEvent;
 import tech.pegasys.pantheon.consensus.ibft.ibftevent.NewChainHead;
@@ -56,13 +56,14 @@ public class IbftController {
   public IbftController(
       final Blockchain blockchain,
       final IbftFinalState ibftFinalState,
-      final IbftBlockHeightManagerFactory ibftBlockHeightManagerFactory) {
+      final IbftBlockHeightManagerFactory ibftBlockHeightManagerFactory,
+      final int messageBufferSize) {
     this(
         blockchain,
         ibftFinalState,
         ibftBlockHeightManagerFactory,
-        new EvictingMap<>(10_000),
-        new IbftGossip(ibftFinalState.getValidatorMulticaster()));
+        new MaxSizeEvictingMap<>(messageBufferSize),
+        new IbftGossip(ibftFinalState.getValidatorMulticaster(), messageBufferSize));
   }
 
   @VisibleForTesting

@@ -13,7 +13,7 @@
 package tech.pegasys.pantheon.consensus.ibft.statemachine;
 
 import tech.pegasys.pantheon.consensus.ibft.ConsensusRoundIdentifier;
-import tech.pegasys.pantheon.consensus.ibft.EvictingMap;
+import tech.pegasys.pantheon.consensus.ibft.MaxSizeEvictingMap;
 import tech.pegasys.pantheon.consensus.ibft.payload.RoundChangeCertificate;
 import tech.pegasys.pantheon.consensus.ibft.payload.RoundChangePayload;
 import tech.pegasys.pantheon.consensus.ibft.payload.SignedData;
@@ -45,7 +45,8 @@ public class RoundChangeManager {
 
     // Store only 1 round change per round per validator
     @VisibleForTesting
-    final Map<Address, SignedData<RoundChangePayload>> receivedMessages = new EvictingMap<>(10_000);
+    final Map<Address, SignedData<RoundChangePayload>> receivedMessages =
+        new MaxSizeEvictingMap<>(10_000);
 
     private boolean actioned = false;
 

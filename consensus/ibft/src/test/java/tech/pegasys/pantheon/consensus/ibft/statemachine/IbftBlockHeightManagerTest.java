@@ -190,7 +190,8 @@ public class IbftBlockHeightManagerTest {
             roundChangeManager,
             roundFactory,
             clock,
-            messageValidatorFactory);
+            messageValidatorFactory,
+            10);
     manager.start();
 
     verify(blockTimer, times(1)).startTimer(any(), any());
@@ -205,7 +206,8 @@ public class IbftBlockHeightManagerTest {
             roundChangeManager,
             roundFactory,
             clock,
-            messageValidatorFactory);
+            messageValidatorFactory,
+            10);
     manager.start();
 
     manager.handleBlockTimerExpiry(roundIdentifier);
@@ -230,7 +232,8 @@ public class IbftBlockHeightManagerTest {
             roundChangeManager,
             roundFactory,
             clock,
-            messageValidatorFactory);
+            messageValidatorFactory,
+            10);
     manager.start();
     verify(roundFactory).createNewRound(any(), eq(0));
 
@@ -250,7 +253,8 @@ public class IbftBlockHeightManagerTest {
             roundChangeManager,
             roundFactory,
             clock,
-            messageValidatorFactory);
+            messageValidatorFactory,
+            10);
     manager.start();
     verify(roundFactory).createNewRound(any(), eq(0));
 
@@ -277,7 +281,8 @@ public class IbftBlockHeightManagerTest {
             roundChangeManager,
             roundFactory,
             clock,
-            messageValidatorFactory);
+            messageValidatorFactory,
+            10);
     manager.start();
 
     manager.handleRoundChangePayload(roundChangePayload);
@@ -297,7 +302,8 @@ public class IbftBlockHeightManagerTest {
             roundChangeManager,
             roundFactory,
             clock,
-            messageValidatorFactory);
+            messageValidatorFactory,
+            10);
     manager.start();
 
     final SignedData<PreparePayload> preparePayload =
@@ -338,7 +344,8 @@ public class IbftBlockHeightManagerTest {
             roundChangeManager,
             roundFactory,
             clock,
-            messageValidatorFactory);
+            messageValidatorFactory,
+            10);
     manager.start();
     manager.handleBlockTimerExpiry(roundIdentifier); // Trigger a Proposal creation.
 

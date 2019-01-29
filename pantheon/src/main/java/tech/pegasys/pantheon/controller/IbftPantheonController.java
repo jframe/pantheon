@@ -228,6 +228,7 @@ public class IbftPantheonController implements PantheonController<IbftContext> {
     final MessageValidatorFactory messageValidatorFactory =
         new MessageValidatorFactory(proposerSelector, protocolSchedule, protocolContext);
 
+    final int msgBufferSize = ibftConfig.getMessageBufferSize();
     final IbftController ibftController =
         new IbftController(
             blockchain,
@@ -236,7 +237,9 @@ public class IbftPantheonController implements PantheonController<IbftContext> {
                 finalState,
                 new IbftRoundFactory(
                     finalState, protocolContext, protocolSchedule, minedBlockObservers),
-                messageValidatorFactory));
+                messageValidatorFactory,
+                msgBufferSize),
+            msgBufferSize);
     ibftController.start();
 
     final EventMultiplexer eventMultiplexer = new EventMultiplexer(ibftController);

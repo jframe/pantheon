@@ -15,15 +15,18 @@ package tech.pegasys.pantheon.consensus.ibft;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
-public class EvictingMap<K, V> extends LinkedHashMap<K, V> {
-  private final int maxSeenMessages;
+/**
+ * Map that starts evicting entries when it reaches maximum size.
+ */
+public class MaxSizeEvictingMap<K, V> extends LinkedHashMap<K, V> {
+  private final int maxEntries;
 
-  public EvictingMap(final int maxSeenMessages) {
-    this.maxSeenMessages = maxSeenMessages;
+  public MaxSizeEvictingMap(final int maxEntries) {
+    this.maxEntries = maxEntries;
   }
 
   @Override
   protected boolean removeEldestEntry(final Entry<K, V> ignored) {
-    return size() > maxSeenMessages;
+    return size() > maxEntries;
   }
 }

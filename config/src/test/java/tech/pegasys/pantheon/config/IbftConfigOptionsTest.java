@@ -26,6 +26,7 @@ public class IbftConfigOptionsTest {
   private static final int EXPECTED_DEFAULT_EPOCH_LENGTH = 30_000;
   private static final int EXPECTED_DEFAULT_BLOCK_PERIOD = 1;
   private static final int EXPECTED_DEFAULT_REQUEST_TIMEOUT = 1;
+  private static final int EXPECTED_DEFAULT_MESSAGE_BUFFER_SIZE = 10_000;
 
   @Test
   public void shouldGetEpochLengthFromConfig() {
@@ -78,6 +79,24 @@ public class IbftConfigOptionsTest {
   public void shouldGetDefaultRequestTimeoutFromDefaultConfig() {
     assertThat(IbftConfigOptions.DEFAULT.getRequestTimeoutSeconds())
         .isEqualTo(EXPECTED_DEFAULT_REQUEST_TIMEOUT);
+  }
+
+  @Test
+  public void shouldGetMessageBufferSizeFromConfig() {
+    final IbftConfigOptions config = fromConfigOptions(singletonMap("MessageBufferSize", 5_000));
+    assertThat(config.getMessageBufferSize()).isEqualTo(5_000);
+  }
+
+  @Test
+  public void shouldFallbackToDefaultMessageBufferSize() {
+    final IbftConfigOptions config = fromConfigOptions(emptyMap());
+    assertThat(config.getMessageBufferSize()).isEqualTo(EXPECTED_DEFAULT_MESSAGE_BUFFER_SIZE);
+  }
+
+  @Test
+  public void shouldGetDefaultMessageBufferSizeFromDefaultConfig() {
+    assertThat(IbftConfigOptions.DEFAULT.getMessageBufferSize())
+        .isEqualTo(EXPECTED_DEFAULT_MESSAGE_BUFFER_SIZE);
   }
 
   private IbftConfigOptions fromConfigOptions(final Map<String, Object> ibftConfigOptions) {
