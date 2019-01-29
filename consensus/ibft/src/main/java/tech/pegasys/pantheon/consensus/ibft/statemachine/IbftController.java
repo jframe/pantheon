@@ -15,6 +15,7 @@ package tech.pegasys.pantheon.consensus.ibft.statemachine;
 import static java.util.Collections.emptyList;
 
 import tech.pegasys.pantheon.consensus.ibft.ConsensusRoundIdentifier;
+import tech.pegasys.pantheon.consensus.ibft.EvictingMap;
 import tech.pegasys.pantheon.consensus.ibft.IbftGossip;
 import tech.pegasys.pantheon.consensus.ibft.ibftevent.BlockTimerExpiry;
 import tech.pegasys.pantheon.consensus.ibft.ibftevent.IbftReceivedMessageEvent;
@@ -39,7 +40,6 @@ import java.util.function.Consumer;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -61,7 +61,7 @@ public class IbftController {
         blockchain,
         ibftFinalState,
         ibftBlockHeightManagerFactory,
-        Maps.newHashMap(),
+        new EvictingMap<>(10_000),
         new IbftGossip(ibftFinalState.getValidatorMulticaster()));
   }
 
