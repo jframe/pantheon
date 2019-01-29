@@ -23,7 +23,7 @@ public class EvictingMap<K, V> extends LinkedHashMap<K, V> {
   }
 
   @Override
-  protected boolean removeEldestEntry(final Entry ignored) {
+  protected boolean removeEldestEntry(final Entry<K, V> ignored) {
     return size() > maxSeenMessages;
   }
 }
