@@ -12,6 +12,8 @@
  */
 package tech.pegasys.pantheon.consensus.ibft;
 
+import static java.util.Collections.newSetFromMap;
+
 import tech.pegasys.pantheon.consensus.ibft.messagedata.CommitMessageData;
 import tech.pegasys.pantheon.consensus.ibft.messagedata.IbftV2;
 import tech.pegasys.pantheon.consensus.ibft.messagedata.NewRoundMessageData;
@@ -25,10 +27,7 @@ import tech.pegasys.pantheon.ethereum.core.Address;
 import tech.pegasys.pantheon.ethereum.p2p.api.Message;
 import tech.pegasys.pantheon.ethereum.p2p.api.MessageData;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.Lists;
@@ -37,22 +36,14 @@ import com.google.common.collect.Lists;
 public class IbftGossip {
   private final ValidatorMulticaster multicaster;
 
-  // Size of the seenMessages cache, should end up utilising 65bytes * this number + some meta data
-  private final int maxSeenMessages;
-
   // Set that starts evicting members when it hits capacity
-  private final Set<Signature> seenMessages =
-      Collections.newSetFromMap(
-          new LinkedHashMap<Signature, Boolean>() {
-            @Override
-            protected boolean removeEldestEntry(final Map.Entry<Signature, Boolean> eldest) {
-              return size() > maxSeenMessages;
-            }
-          });
+  private final Set<Signature> seenMessages;
 
   IbftGossip(final ValidatorMulticaster multicaster, final int maxSeenMessages) {
-    this.maxSeenMessages = maxSeenMessages;
+    // Size of the seenMessages cache, should end up utilising 65bytes * this number + some meta
+    // data
     this.multicaster = multicaster;
+    seenMessages = newSetFromMap(new EvictingMap<>(maxSeenMessages));
   }
 
   /**
