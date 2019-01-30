@@ -144,6 +144,7 @@ public class IbftPantheonController implements PantheonController<IbftContext> {
 
     final IbftConfigOptions ibftConfig =
         genesisConfig.getConfigOptions().getRevisedIbftConfigOptions();
+    final int msgBufferSize = ibftConfig.getMessageBufferSize();
     final EpochManager epochManager = new EpochManager(ibftConfig.getEpochLength());
 
     final BlockInterface blockInterface = new IbftBlockInterface();
@@ -186,7 +187,7 @@ public class IbftPantheonController implements PantheonController<IbftContext> {
         TransactionPoolFactory.createTransactionPool(
             protocolSchedule, protocolContext, ethProtocolManager.ethContext());
 
-    final IbftEventQueue ibftEventQueue = new IbftEventQueue();
+    final IbftEventQueue ibftEventQueue = new IbftEventQueue(msgBufferSize);
 
     final IbftBlockCreatorFactory blockCreatorFactory =
         new IbftBlockCreatorFactory(
@@ -196,7 +197,6 @@ public class IbftPantheonController implements PantheonController<IbftContext> {
             protocolSchedule,
             miningParams,
             Util.publicKeyToAddress(nodeKeys.getPublicKey()));
-    final int msgBufferSize = ibftConfig.getMessageBufferSize();
 
     final ProposerSelector proposerSelector =
         new ProposerSelector(blockchain, voteTally, blockInterface, true);

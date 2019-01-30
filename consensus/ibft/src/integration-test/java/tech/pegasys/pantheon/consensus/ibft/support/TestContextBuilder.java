@@ -115,7 +115,7 @@ public class TestContextBuilder {
   public static final int MESSAGE_BUFFER_SIZE = 10_000;
 
   private Clock clock = Clock.fixed(Instant.MIN, ZoneId.of("UTC"));
-  private IbftEventQueue ibftEventQueue = new IbftEventQueue();
+  private IbftEventQueue ibftEventQueue = new IbftEventQueue(MESSAGE_BUFFER_SIZE);
   private int validatorCount = 4;
   private int indexOfFirstLocallyProposedBlock = 0; // Meaning first block is from remote peer.
   private boolean useGossip = false;
