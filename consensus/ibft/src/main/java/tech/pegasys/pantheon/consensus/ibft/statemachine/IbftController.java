@@ -15,6 +15,7 @@ package tech.pegasys.pantheon.consensus.ibft.statemachine;
 import static java.util.Collections.emptyList;
 
 import tech.pegasys.pantheon.consensus.ibft.ConsensusRoundIdentifier;
+import tech.pegasys.pantheon.consensus.ibft.Gossiper;
 import tech.pegasys.pantheon.consensus.ibft.IbftGossip;
 import tech.pegasys.pantheon.consensus.ibft.SizeLimitedMap;
 import tech.pegasys.pantheon.consensus.ibft.ibftevent.BlockTimerExpiry;
@@ -51,19 +52,15 @@ public class IbftController {
   private final IbftBlockHeightManagerFactory ibftBlockHeightManagerFactory;
   private final Map<Long, List<Message>> futureMessages;
   private BlockHeightManager currentHeightManager;
-  private final IbftGossip gossiper;
+  private final Gossiper gossiper;
 
   public IbftController(
       final Blockchain blockchain,
       final IbftFinalState ibftFinalState,
       final IbftBlockHeightManagerFactory ibftBlockHeightManagerFactory,
+      final IbftGossip gossiper,
       final int messageBufferSize) {
-    this(
-        blockchain,
-        ibftFinalState,
-        ibftBlockHeightManagerFactory,
-        new SizeLimitedMap<>(messageBufferSize),
-        new IbftGossip(ibftFinalState.getValidatorMulticaster(), messageBufferSize));
+    this(blockchain, ibftFinalState, ibftBlockHeightManagerFactory, gossiper, new SizeLimitedMap<>(messageBufferSize));
   }
 
   @VisibleForTesting
@@ -71,8 +68,8 @@ public class IbftController {
       final Blockchain blockchain,
       final IbftFinalState ibftFinalState,
       final IbftBlockHeightManagerFactory ibftBlockHeightManagerFactory,
-      final Map<Long, List<Message>> futureMessages,
-      final IbftGossip gossiper) {
+      final Gossiper gossiper,
+      final Map<Long, List<Message>> futureMessages) {
     this.blockchain = blockchain;
     this.ibftFinalState = ibftFinalState;
     this.ibftBlockHeightManagerFactory = ibftBlockHeightManagerFactory;
@@ -143,7 +140,7 @@ public class IbftController {
         signedPayload.getPayload().getMessageType(),
         signedPayload);
     if (processMessage(signedPayload, message)) {
-      gossiper.gossipMessage(message);
+      gossiper.send(message);
       handleMessage.accept(signedPayload);
     }
   }
