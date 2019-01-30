@@ -112,6 +112,7 @@ public class TestContextBuilder {
   public static final int EPOCH_LENGTH = 10_000;
   public static final int BLOCK_TIMER_SEC = 3;
   public static final int ROUND_TIMER_SEC = 12;
+  public static final int MESSAGE_BUFFER_SIZE = 10_000;
 
   private Clock clock = Clock.fixed(Instant.MIN, ZoneId.of("UTC"));
   private IbftEventQueue ibftEventQueue = new IbftEventQueue();
@@ -158,7 +159,8 @@ public class TestContextBuilder {
     // Use a stubbed version of the multicaster, to prevent creating PeerConnections etc.
     final StubValidatorMulticaster multicaster = new StubValidatorMulticaster();
 
-    final UniqueMessageMulticaster uniqueMulticaster = new UniqueMessageMulticaster(multicaster);
+    final UniqueMessageMulticaster uniqueMulticaster =
+        new UniqueMessageMulticaster(multicaster, MESSAGE_BUFFER_SIZE);
 
     final Gossiper gossiper = useGossip ? new IbftGossip(uniqueMulticaster) : mock(Gossiper.class);
 
@@ -301,7 +303,8 @@ public class TestContextBuilder {
                 finalState,
                 new IbftRoundFactory(
                     finalState, protocolContext, protocolSchedule, minedBlockObservers),
-                messageValidatorFactory),
+                messageValidatorFactory,
+                MESSAGE_BUFFER_SIZE),
             gossiper,
             new HashMap<>());
 

@@ -60,7 +60,12 @@ public class IbftController {
       final IbftBlockHeightManagerFactory ibftBlockHeightManagerFactory,
       final IbftGossip gossiper,
       final int messageBufferSize) {
-    this(blockchain, ibftFinalState, ibftBlockHeightManagerFactory, gossiper, new SizeLimitedMap<>(messageBufferSize));
+    this(
+        blockchain,
+        ibftFinalState,
+        ibftBlockHeightManagerFactory,
+        gossiper,
+        new SizeLimitedMap<>(messageBufferSize));
   }
 
   @VisibleForTesting

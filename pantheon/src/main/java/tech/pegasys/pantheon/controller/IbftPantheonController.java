@@ -196,12 +196,14 @@ public class IbftPantheonController implements PantheonController<IbftContext> {
             protocolSchedule,
             miningParams,
             Util.publicKeyToAddress(nodeKeys.getPublicKey()));
+    final int msgBufferSize = ibftConfig.getMessageBufferSize();
 
     final ProposerSelector proposerSelector =
         new ProposerSelector(blockchain, voteTally, blockInterface, true);
     final ValidatorPeers peers =
         new ValidatorPeers(protocolContext.getConsensusState().getVoteTally());
-    final UniqueMessageMulticaster uniqueMessageMulticaster = new UniqueMessageMulticaster(peers);
+    final UniqueMessageMulticaster uniqueMessageMulticaster =
+        new UniqueMessageMulticaster(peers, msgBufferSize);
 
     final Subscribers<MinedBlockObserver> minedBlockObservers = new Subscribers<>();
     minedBlockObservers.subscribe(ethProtocolManager);
@@ -231,7 +233,6 @@ public class IbftPantheonController implements PantheonController<IbftContext> {
     final MessageValidatorFactory messageValidatorFactory =
         new MessageValidatorFactory(proposerSelector, protocolSchedule, protocolContext);
 
-    final int msgBufferSize = ibftConfig.getMessageBufferSize();
     final IbftController ibftController =
         new IbftController(
             blockchain,

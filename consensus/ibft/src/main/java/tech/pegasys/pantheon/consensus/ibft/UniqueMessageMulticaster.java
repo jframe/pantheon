@@ -12,44 +12,32 @@
  */
 package tech.pegasys.pantheon.consensus.ibft;
 
+import static java.util.Collections.newSetFromMap;
+
 import tech.pegasys.pantheon.consensus.ibft.network.ValidatorMulticaster;
 import tech.pegasys.pantheon.ethereum.core.Address;
 import tech.pegasys.pantheon.ethereum.p2p.api.MessageData;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Set;
 
 public class UniqueMessageMulticaster implements ValidatorMulticaster {
-
-  private final int maxSeenMessages;
   private final ValidatorMulticaster multicaster;
-
-  UniqueMessageMulticaster(final ValidatorMulticaster multicaster, final int maxSeenMessages) {
-    this.maxSeenMessages = maxSeenMessages;
-    this.multicaster = multicaster;
-  }
+  private final Set<Integer> seenMessages;
 
   /**
    * Constructor that attaches gossip logic to a set of multicaster
    *
    * @param multicaster Network connections to the remote validators
+   * @param maxSeenMessages Maximum messages to track as seen
    */
-  public UniqueMessageMulticaster(final ValidatorMulticaster multicaster) {
-    this(multicaster, 10_000);
+  public UniqueMessageMulticaster(
+      final ValidatorMulticaster multicaster, final int maxSeenMessages) {
+    this.multicaster = multicaster;
+    // Set that starts evicting members when it hits capacity
+    this.seenMessages = newSetFromMap(new SizeLimitedMap<>(maxSeenMessages));
   }
-
-  // Set that starts evicting members when it hits capacity
-  private final Set<Integer> seenMessages =
-      Collections.newSetFromMap(
-          new LinkedHashMap<Integer, Boolean>() {
-            @Override
-            protected boolean removeEldestEntry(final Map.Entry<Integer, Boolean> eldest) {
-              return size() > maxSeenMessages;
-            }
-          });
 
   @Override
   public void send(final MessageData message) {
