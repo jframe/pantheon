@@ -16,12 +16,13 @@ import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
 /**
- * Map that starts evicting entries when it reaches maximum size.
+ * Map that is limited to a specified size and will evict oldest entries when the size limit is
+ * reached.
  */
-public class MaxSizeEvictingMap<K, V> extends LinkedHashMap<K, V> {
+public class SizeLimitedMap<K, V> extends LinkedHashMap<K, V> {
   private final int maxEntries;
 
-  public MaxSizeEvictingMap(final int maxEntries) {
+  public SizeLimitedMap(final int maxEntries) {
     this.maxEntries = maxEntries;
   }
 

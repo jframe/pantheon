@@ -48,7 +48,7 @@ public class IbftGossip {
   public IbftGossip(final ValidatorMulticaster multicaster, final int maxSeenMessages) {
     this.multicaster = multicaster;
     // Size of the seenMessages cache should end up utilising 65bytes * this number + some metadata
-    seenMessages = newSetFromMap(new MaxSizeEvictingMap<>(maxSeenMessages));
+    seenMessages = newSetFromMap(new SizeLimitedMap<>(maxSeenMessages));
   }
 
   /**

@@ -18,8 +18,8 @@ import static tech.pegasys.pantheon.consensus.ibft.statemachine.IbftBlockHeightM
 
 import tech.pegasys.pantheon.consensus.ibft.BlockTimer;
 import tech.pegasys.pantheon.consensus.ibft.ConsensusRoundIdentifier;
-import tech.pegasys.pantheon.consensus.ibft.MaxSizeEvictingMap;
 import tech.pegasys.pantheon.consensus.ibft.RoundTimer;
+import tech.pegasys.pantheon.consensus.ibft.SizeLimitedMap;
 import tech.pegasys.pantheon.consensus.ibft.ibftevent.RoundExpiry;
 import tech.pegasys.pantheon.consensus.ibft.network.IbftMessageTransmitter;
 import tech.pegasys.pantheon.consensus.ibft.payload.CommitPayload;
@@ -92,7 +92,7 @@ public class IbftBlockHeightManager implements BlockHeightManager {
     this.roundChangeManager = roundChangeManager;
     this.finalState = finalState;
 
-    futureRoundStateBuffer = new MaxSizeEvictingMap<>(maxFutureRoundStateBufferSize);
+    futureRoundStateBuffer = new SizeLimitedMap<>(maxFutureRoundStateBufferSize);
     newRoundMessageValidator = messageValidatorFactory.createNewRoundValidator(parentHeader);
 
     roundStateCreator =
