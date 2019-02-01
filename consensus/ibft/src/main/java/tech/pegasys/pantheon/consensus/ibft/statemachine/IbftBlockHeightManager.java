@@ -19,7 +19,6 @@ import static tech.pegasys.pantheon.consensus.ibft.statemachine.IbftBlockHeightM
 import tech.pegasys.pantheon.consensus.ibft.BlockTimer;
 import tech.pegasys.pantheon.consensus.ibft.ConsensusRoundIdentifier;
 import tech.pegasys.pantheon.consensus.ibft.RoundTimer;
-import tech.pegasys.pantheon.consensus.ibft.SizeLimitedMap;
 import tech.pegasys.pantheon.consensus.ibft.ibftevent.RoundExpiry;
 import tech.pegasys.pantheon.consensus.ibft.network.IbftMessageTransmitter;
 import tech.pegasys.pantheon.consensus.ibft.payload.CommitPayload;
@@ -44,6 +43,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import com.google.common.collect.Maps;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -64,7 +64,7 @@ public class IbftBlockHeightManager implements BlockHeightManager {
   private final BlockTimer blockTimer;
   private final IbftMessageTransmitter transmitter;
   private final MessageFactory messageFactory;
-  private final Map<Integer, RoundState> futureRoundStateBuffer;
+  private final Map<Integer, RoundState> futureRoundStateBuffer = Maps.newHashMap();
   private final NewRoundMessageValidator newRoundMessageValidator;
   private final Clock clock;
   private final Function<ConsensusRoundIdentifier, RoundState> roundStateCreator;
@@ -80,8 +80,7 @@ public class IbftBlockHeightManager implements BlockHeightManager {
       final RoundChangeManager roundChangeManager,
       final IbftRoundFactory ibftRoundFactory,
       final Clock clock,
-      final MessageValidatorFactory messageValidatorFactory,
-      final int maxFutureRoundStateBufferSize) {
+      final MessageValidatorFactory messageValidatorFactory) {
     this.parentHeader = parentHeader;
     this.roundFactory = ibftRoundFactory;
     this.roundTimer = finalState.getRoundTimer();
@@ -92,7 +91,6 @@ public class IbftBlockHeightManager implements BlockHeightManager {
     this.roundChangeManager = roundChangeManager;
     this.finalState = finalState;
 
-    futureRoundStateBuffer = new SizeLimitedMap<>(maxFutureRoundStateBufferSize);
     newRoundMessageValidator = messageValidatorFactory.createNewRoundValidator(parentHeader);
 
     roundStateCreator =

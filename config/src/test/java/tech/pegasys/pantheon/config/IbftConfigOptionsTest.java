@@ -26,7 +26,8 @@ public class IbftConfigOptionsTest {
   private static final int EXPECTED_DEFAULT_EPOCH_LENGTH = 30_000;
   private static final int EXPECTED_DEFAULT_BLOCK_PERIOD = 1;
   private static final int EXPECTED_DEFAULT_REQUEST_TIMEOUT = 1;
-  private static final int EXPECTED_DEFAULT_MESSAGE_BUFFER_SIZE = 10_000;
+  private static final int EXPECTED_DEFAULT_SEEN_MESSAGES_QUEUE_SIZE = 10_000;
+  private static final int EXPECTED_DEFAULT_EVENT_SIZE = 1000;
 
   @Test
   public void shouldGetEpochLengthFromConfig() {
@@ -82,22 +83,41 @@ public class IbftConfigOptionsTest {
   }
 
   @Test
-  public void shouldGetMessageBufferSizeFromConfig() {
-    final IbftConfigOptions config = fromConfigOptions(singletonMap("MessageBufferSize", 5_000));
-    assertThat(config.getMessageBufferSize()).isEqualTo(5_000);
+  public void shouldGetSeenMessageQueueSizeFromConfig() {
+    final IbftConfigOptions config = fromConfigOptions(singletonMap("SeenMessageQueueSize", 100));
+    assertThat(config.getSeenMessageQueueSize()).isEqualTo(100);
   }
 
   @Test
-  public void shouldFallbackToDefaultMessageBufferSize() {
+  public void shouldFallbackToDefaultSeenMessageQueueSize() {
     final IbftConfigOptions config = fromConfigOptions(emptyMap());
-    assertThat(config.getMessageBufferSize()).isEqualTo(EXPECTED_DEFAULT_MESSAGE_BUFFER_SIZE);
+    assertThat(config.getSeenMessageQueueSize()).isEqualTo(EXPECTED_DEFAULT_SEEN_MESSAGES_QUEUE_SIZE);
   }
 
   @Test
-  public void shouldGetDefaultMessageBufferSizeFromDefaultConfig() {
-    assertThat(IbftConfigOptions.DEFAULT.getMessageBufferSize())
-        .isEqualTo(EXPECTED_DEFAULT_MESSAGE_BUFFER_SIZE);
+  public void shouldGetDefaultSeenMessageQueueSizeFromDefaultConfig() {
+    assertThat(IbftConfigOptions.DEFAULT.getSeenMessageQueueSize())
+        .isEqualTo(EXPECTED_DEFAULT_SEEN_MESSAGES_QUEUE_SIZE);
   }
+
+  @Test
+  public void shouldGetEventQueueSizeFromConfig() {
+    final IbftConfigOptions config = fromConfigOptions(singletonMap("EventQueueSize", 100));
+    assertThat(config.getEventQueueSize()).isEqualTo(100);
+  }
+
+  @Test
+  public void shouldFallbackToDefaultEventQueueSize() {
+    final IbftConfigOptions config = fromConfigOptions(emptyMap());
+    assertThat(config.getEventQueueSize()).isEqualTo(EXPECTED_DEFAULT_EVENT_SIZE);
+  }
+
+  @Test
+  public void shouldGetDefaultEventQueueSizeFromDefaultConfig() {
+    assertThat(IbftConfigOptions.DEFAULT.getEventQueueSize())
+        .isEqualTo(EXPECTED_DEFAULT_EVENT_SIZE);
+  }
+
 
   private IbftConfigOptions fromConfigOptions(final Map<String, Object> ibftConfigOptions) {
     return GenesisConfigFile.fromConfig(

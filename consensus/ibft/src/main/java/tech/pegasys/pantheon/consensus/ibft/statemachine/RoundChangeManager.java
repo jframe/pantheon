@@ -13,7 +13,6 @@
 package tech.pegasys.pantheon.consensus.ibft.statemachine;
 
 import tech.pegasys.pantheon.consensus.ibft.ConsensusRoundIdentifier;
-import tech.pegasys.pantheon.consensus.ibft.SizeLimitedMap;
 import tech.pegasys.pantheon.consensus.ibft.payload.RoundChangeCertificate;
 import tech.pegasys.pantheon.consensus.ibft.payload.RoundChangePayload;
 import tech.pegasys.pantheon.consensus.ibft.payload.SignedData;
@@ -45,8 +44,7 @@ public class RoundChangeManager {
 
     // Store only 1 round change per round per validator
     @VisibleForTesting
-    final Map<Address, SignedData<RoundChangePayload>> receivedMessages =
-        new SizeLimitedMap<>(10_000);
+    final Map<Address, SignedData<RoundChangePayload>> receivedMessages = Maps.newLinkedHashMap();
 
     private boolean actioned = false;
 

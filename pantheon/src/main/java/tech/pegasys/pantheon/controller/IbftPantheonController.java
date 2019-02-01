@@ -145,7 +145,6 @@ public class IbftPantheonController implements PantheonController<IbftContext> {
 
     final IbftConfigOptions ibftConfig =
         genesisConfig.getConfigOptions().getRevisedIbftConfigOptions();
-    final int msgBufferSize = ibftConfig.getMessageBufferSize();
     final EpochManager epochManager = new EpochManager(ibftConfig.getEpochLength());
 
     final BlockInterface blockInterface = new IbftBlockInterface();
@@ -188,7 +187,7 @@ public class IbftPantheonController implements PantheonController<IbftContext> {
         TransactionPoolFactory.createTransactionPool(
             protocolSchedule, protocolContext, ethProtocolManager.ethContext());
 
-    final IbftEventQueue ibftEventQueue = new IbftEventQueue(msgBufferSize);
+    final IbftEventQueue ibftEventQueue = new IbftEventQueue(ibftConfig.getEventQueueSize());
 
     final IbftBlockCreatorFactory blockCreatorFactory =
         new IbftBlockCreatorFactory(
@@ -208,7 +207,7 @@ public class IbftPantheonController implements PantheonController<IbftContext> {
         new ValidatorPeers(protocolContext.getConsensusState().getVoteTally());
 
     final UniqueMessageMulticaster uniqueMessageMulticaster =
-        new UniqueMessageMulticaster(peers, msgBufferSize);
+        new UniqueMessageMulticaster(peers, ibftConfig.getSeenMessageQueueSize());
 
     final IbftGossip gossiper = new IbftGossip(uniqueMessageMulticaster);
 
@@ -246,10 +245,8 @@ public class IbftPantheonController implements PantheonController<IbftContext> {
                 finalState,
                 new IbftRoundFactory(
                     finalState, protocolContext, protocolSchedule, minedBlockObservers),
-                messageValidatorFactory,
-                msgBufferSize),
-            gossiper,
-            msgBufferSize);
+                messageValidatorFactory),
+            gossiper);
     ibftController.start();
 
     final EventMultiplexer eventMultiplexer = new EventMultiplexer(ibftController);

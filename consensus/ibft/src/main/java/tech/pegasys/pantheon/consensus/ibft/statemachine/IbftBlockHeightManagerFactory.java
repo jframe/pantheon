@@ -21,17 +21,14 @@ public class IbftBlockHeightManagerFactory {
   private final IbftRoundFactory roundFactory;
   private final IbftFinalState finalState;
   private final MessageValidatorFactory messageValidatorFactory;
-  private final int messageBufferSize;
 
   public IbftBlockHeightManagerFactory(
       final IbftFinalState finalState,
       final IbftRoundFactory roundFactory,
-      final MessageValidatorFactory messageValidatorFactory,
-      final int messageBufferSize) {
+      final MessageValidatorFactory messageValidatorFactory) {
     this.roundFactory = roundFactory;
     this.finalState = finalState;
     this.messageValidatorFactory = messageValidatorFactory;
-    this.messageBufferSize = messageBufferSize;
   }
 
   public BlockHeightManager create(final BlockHeader parentHeader) {
@@ -55,7 +52,6 @@ public class IbftBlockHeightManagerFactory {
             messageValidatorFactory.createRoundChangeMessageValidator(parentHeader)),
         roundFactory,
         finalState.getClock(),
-        messageValidatorFactory,
-        messageBufferSize);
+        messageValidatorFactory);
   }
 }
