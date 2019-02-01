@@ -112,10 +112,11 @@ public class TestContextBuilder {
   public static final int EPOCH_LENGTH = 10_000;
   public static final int BLOCK_TIMER_SEC = 3;
   public static final int ROUND_TIMER_SEC = 12;
-  public static final int MESSAGE_BUFFER_SIZE = 10_000;
+  public static final int EVENT_QUEUE_SIZE = 1000;
+  public static final int SEEN_MESSAGE_SIZE = 100;
 
   private Clock clock = Clock.fixed(Instant.MIN, ZoneId.of("UTC"));
-  private IbftEventQueue ibftEventQueue = new IbftEventQueue(MESSAGE_BUFFER_SIZE);
+  private IbftEventQueue ibftEventQueue = new IbftEventQueue(EVENT_QUEUE_SIZE);
   private int validatorCount = 4;
   private int indexOfFirstLocallyProposedBlock = 0; // Meaning first block is from remote peer.
   private boolean useGossip = false;
@@ -160,7 +161,7 @@ public class TestContextBuilder {
     final StubValidatorMulticaster multicaster = new StubValidatorMulticaster();
 
     final UniqueMessageMulticaster uniqueMulticaster =
-        new UniqueMessageMulticaster(multicaster, MESSAGE_BUFFER_SIZE);
+        new UniqueMessageMulticaster(multicaster, SEEN_MESSAGE_SIZE);
 
     final Gossiper gossiper = useGossip ? new IbftGossip(uniqueMulticaster) : mock(Gossiper.class);
 
@@ -303,8 +304,7 @@ public class TestContextBuilder {
                 finalState,
                 new IbftRoundFactory(
                     finalState, protocolContext, protocolSchedule, minedBlockObservers),
-                messageValidatorFactory,
-                MESSAGE_BUFFER_SIZE),
+                messageValidatorFactory),
             gossiper,
             new HashMap<>());
 
