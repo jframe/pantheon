@@ -91,7 +91,8 @@ public class IbftConfigOptionsTest {
   @Test
   public void shouldFallbackToDefaultSeenMessageQueueSize() {
     final IbftConfigOptions config = fromConfigOptions(emptyMap());
-    assertThat(config.getSeenMessageQueueSize()).isEqualTo(EXPECTED_DEFAULT_SEEN_MESSAGES_QUEUE_SIZE);
+    assertThat(config.getSeenMessageQueueSize())
+        .isEqualTo(EXPECTED_DEFAULT_SEEN_MESSAGES_QUEUE_SIZE);
   }
 
   @Test
@@ -117,7 +118,6 @@ public class IbftConfigOptionsTest {
     assertThat(IbftConfigOptions.DEFAULT.getEventQueueSize())
         .isEqualTo(EXPECTED_DEFAULT_EVENT_SIZE);
   }
-
 
   private IbftConfigOptions fromConfigOptions(final Map<String, Object> ibftConfigOptions) {
     return GenesisConfigFile.fromConfig(
