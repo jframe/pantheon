@@ -21,8 +21,8 @@ public class IbftConfigOptions {
   private static final long DEFAULT_EPOCH_LENGTH = 30_000;
   private static final int DEFAULT_BLOCK_PERIOD_SECONDS = 1;
   private static final int DEFAULT_ROUND_EXPIRY_SECONDS = 1;
-  private static final int DEFAULT_SEEN_MESSAGES_QUEUE_SIZE = 10_000;
-  private static final int DEFAULT_EVENT_SIZE = 1000;
+  private static final int DEFAULT_GOSSIPED_HISTORY_LIMIT = 10_000;
+  private static final int DEFAULT_MESSAGE_QUEUE_LIMIT = 1000;
 
   private final JsonObject ibftConfigRoot;
 
@@ -42,11 +42,11 @@ public class IbftConfigOptions {
     return ibftConfigRoot.getInteger("requesttimeoutseconds", DEFAULT_ROUND_EXPIRY_SECONDS);
   }
 
-  public int getSeenMessageQueueSize() {
-    return ibftConfigRoot.getInteger("seenmessagequeuesize", DEFAULT_SEEN_MESSAGES_QUEUE_SIZE);
+  public int getSeenMessagesLimit() {
+    return ibftConfigRoot.getInteger("gossipedhistorylimit", DEFAULT_GOSSIPED_HISTORY_LIMIT);
   }
 
-  public int getEventQueueSize() {
-    return ibftConfigRoot.getInteger("eventqueuesize", DEFAULT_EVENT_SIZE);
+  public int getEventQueueLimit() {
+    return ibftConfigRoot.getInteger("messagequeuelimit", DEFAULT_MESSAGE_QUEUE_LIMIT);
   }
 }

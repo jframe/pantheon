@@ -26,8 +26,8 @@ public class IbftConfigOptionsTest {
   private static final int EXPECTED_DEFAULT_EPOCH_LENGTH = 30_000;
   private static final int EXPECTED_DEFAULT_BLOCK_PERIOD = 1;
   private static final int EXPECTED_DEFAULT_REQUEST_TIMEOUT = 1;
-  private static final int EXPECTED_DEFAULT_SEEN_MESSAGES_QUEUE_SIZE = 10_000;
-  private static final int EXPECTED_DEFAULT_EVENT_SIZE = 1000;
+  private static final int EXPECTED_DEFAULT_GOSSIPED_HISTORY_LIMIT = 10_000;
+  private static final int EXPECTED_DEFAULT_MESSAGE_QUEUE_LIMIT = 1000;
 
   @Test
   public void shouldGetEpochLengthFromConfig() {
@@ -83,40 +83,39 @@ public class IbftConfigOptionsTest {
   }
 
   @Test
-  public void shouldGetSeenMessageQueueSizeFromConfig() {
-    final IbftConfigOptions config = fromConfigOptions(singletonMap("SeenMessageQueueSize", 100));
-    assertThat(config.getSeenMessageQueueSize()).isEqualTo(100);
+  public void shouldGetGossipedHistoryLimitFromConfig() {
+    final IbftConfigOptions config = fromConfigOptions(singletonMap("GossipedHistoryLimit", 100));
+    assertThat(config.getSeenMessagesLimit()).isEqualTo(100);
   }
 
   @Test
-  public void shouldFallbackToDefaultSeenMessageQueueSize() {
+  public void shouldFallbackToDefaultGossipedHistoryLimit() {
     final IbftConfigOptions config = fromConfigOptions(emptyMap());
-    assertThat(config.getSeenMessageQueueSize())
-        .isEqualTo(EXPECTED_DEFAULT_SEEN_MESSAGES_QUEUE_SIZE);
+    assertThat(config.getSeenMessagesLimit()).isEqualTo(EXPECTED_DEFAULT_GOSSIPED_HISTORY_LIMIT);
   }
 
   @Test
-  public void shouldGetDefaultSeenMessageQueueSizeFromDefaultConfig() {
-    assertThat(IbftConfigOptions.DEFAULT.getSeenMessageQueueSize())
-        .isEqualTo(EXPECTED_DEFAULT_SEEN_MESSAGES_QUEUE_SIZE);
+  public void shouldGetDefaultGossipedHistoryLimitFromDefaultConfig() {
+    assertThat(IbftConfigOptions.DEFAULT.getSeenMessagesLimit())
+        .isEqualTo(EXPECTED_DEFAULT_GOSSIPED_HISTORY_LIMIT);
   }
 
   @Test
-  public void shouldGetEventQueueSizeFromConfig() {
-    final IbftConfigOptions config = fromConfigOptions(singletonMap("EventQueueSize", 100));
-    assertThat(config.getEventQueueSize()).isEqualTo(100);
+  public void shouldGetMessageQueueLimitFromConfig() {
+    final IbftConfigOptions config = fromConfigOptions(singletonMap("MessageQueueLimit", 100));
+    assertThat(config.getEventQueueLimit()).isEqualTo(100);
   }
 
   @Test
-  public void shouldFallbackToDefaultEventQueueSize() {
+  public void shouldFallbackToDefaultMessageQueueLimit() {
     final IbftConfigOptions config = fromConfigOptions(emptyMap());
-    assertThat(config.getEventQueueSize()).isEqualTo(EXPECTED_DEFAULT_EVENT_SIZE);
+    assertThat(config.getEventQueueLimit()).isEqualTo(EXPECTED_DEFAULT_MESSAGE_QUEUE_LIMIT);
   }
 
   @Test
-  public void shouldGetDefaultEventQueueSizeFromDefaultConfig() {
-    assertThat(IbftConfigOptions.DEFAULT.getEventQueueSize())
-        .isEqualTo(EXPECTED_DEFAULT_EVENT_SIZE);
+  public void shouldGetDefaultMessageQueueLimitFromDefaultConfig() {
+    assertThat(IbftConfigOptions.DEFAULT.getEventQueueLimit())
+        .isEqualTo(EXPECTED_DEFAULT_MESSAGE_QUEUE_LIMIT);
   }
 
   private IbftConfigOptions fromConfigOptions(final Map<String, Object> ibftConfigOptions) {
