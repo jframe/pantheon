@@ -16,6 +16,7 @@ import static java.util.Collections.newSetFromMap;
 
 import tech.pegasys.pantheon.consensus.ibft.network.ValidatorMulticaster;
 import tech.pegasys.pantheon.ethereum.core.Address;
+import tech.pegasys.pantheon.ethereum.core.Hash;
 import tech.pegasys.pantheon.ethereum.p2p.api.MessageData;
 
 import java.util.Collection;
@@ -24,7 +25,7 @@ import java.util.Set;
 
 public class UniqueMessageMulticaster implements ValidatorMulticaster {
   private final ValidatorMulticaster multicaster;
-  private final Set<Integer> seenMessages;
+  private final Set<Hash> seenMessages;
 
   /**
    * Constructor that attaches gossip logic to a set of multicaster
@@ -46,7 +47,7 @@ public class UniqueMessageMulticaster implements ValidatorMulticaster {
 
   @Override
   public void send(final MessageData message, final Collection<Address> blackList) {
-    final int uniqueID = message.hashCode();
+    final Hash uniqueID = Hash.hash(message.getData());
     if (seenMessages.contains(uniqueID)) {
       return;
     }
