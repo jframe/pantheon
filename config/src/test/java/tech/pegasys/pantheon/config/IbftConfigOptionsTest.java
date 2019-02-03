@@ -26,7 +26,7 @@ public class IbftConfigOptionsTest {
   private static final int EXPECTED_DEFAULT_EPOCH_LENGTH = 30_000;
   private static final int EXPECTED_DEFAULT_BLOCK_PERIOD = 1;
   private static final int EXPECTED_DEFAULT_REQUEST_TIMEOUT = 1;
-  private static final int EXPECTED_DEFAULT_GOSSIPED_HISTORY_LIMIT = 10_000;
+  private static final int EXPECTED_DEFAULT_GOSSIPED_HISTORY_LIMIT = 1000;
   private static final int EXPECTED_DEFAULT_MESSAGE_QUEUE_LIMIT = 1000;
 
   @Test
