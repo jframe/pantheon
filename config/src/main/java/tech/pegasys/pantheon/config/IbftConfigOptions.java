@@ -21,7 +21,7 @@ public class IbftConfigOptions {
   private static final long DEFAULT_EPOCH_LENGTH = 30_000;
   private static final int DEFAULT_BLOCK_PERIOD_SECONDS = 1;
   private static final int DEFAULT_ROUND_EXPIRY_SECONDS = 1;
-  private static final int DEFAULT_GOSSIPED_HISTORY_LIMIT = 10_000;
+  private static final int DEFAULT_GOSSIPED_HISTORY_LIMIT = 1000;
   private static final int DEFAULT_MESSAGE_QUEUE_LIMIT = 1000;
 
   private final JsonObject ibftConfigRoot;
