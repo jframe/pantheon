@@ -187,7 +187,7 @@ public class IbftPantheonController implements PantheonController<IbftContext> {
         TransactionPoolFactory.createTransactionPool(
             protocolSchedule, protocolContext, ethProtocolManager.ethContext());
 
-    final IbftEventQueue ibftEventQueue = new IbftEventQueue(ibftConfig.getEventQueueLimit());
+    final IbftEventQueue ibftEventQueue = new IbftEventQueue(ibftConfig.getMessageQueueLimit());
 
     final IbftBlockCreatorFactory blockCreatorFactory =
         new IbftBlockCreatorFactory(
@@ -207,7 +207,7 @@ public class IbftPantheonController implements PantheonController<IbftContext> {
         new ValidatorPeers(protocolContext.getConsensusState().getVoteTally());
 
     final UniqueMessageMulticaster uniqueMessageMulticaster =
-        new UniqueMessageMulticaster(peers, ibftConfig.getSeenMessagesLimit());
+        new UniqueMessageMulticaster(peers, ibftConfig.getGossipedHistoryLimit());
 
     final IbftGossip gossiper = new IbftGossip(uniqueMessageMulticaster);
 

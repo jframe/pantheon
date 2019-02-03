@@ -42,11 +42,11 @@ public class IbftConfigOptions {
     return ibftConfigRoot.getInteger("requesttimeoutseconds", DEFAULT_ROUND_EXPIRY_SECONDS);
   }
 
-  public int getSeenMessagesLimit() {
+  public int getGossipedHistoryLimit() {
     return ibftConfigRoot.getInteger("gossipedhistorylimit", DEFAULT_GOSSIPED_HISTORY_LIMIT);
   }
 
-  public int getEventQueueLimit() {
+  public int getMessageQueueLimit() {
     return ibftConfigRoot.getInteger("messagequeuelimit", DEFAULT_MESSAGE_QUEUE_LIMIT);
   }
 }
