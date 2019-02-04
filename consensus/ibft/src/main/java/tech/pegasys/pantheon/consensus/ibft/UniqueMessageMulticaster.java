@@ -31,13 +31,13 @@ public class UniqueMessageMulticaster implements ValidatorMulticaster {
    * Constructor that attaches gossip logic to a set of multicaster
    *
    * @param multicaster Network connections to the remote validators
-   * @param maxSeenMessages Maximum messages to track as seen
+   * @param gossipHistoryLimit Maximum messages to track as seen
    */
   public UniqueMessageMulticaster(
-      final ValidatorMulticaster multicaster, final int maxSeenMessages) {
+      final ValidatorMulticaster multicaster, final int gossipHistoryLimit) {
     this.multicaster = multicaster;
     // Set that starts evicting members when it hits capacity
-    this.seenMessages = newSetFromMap(new SizeLimitedMap<>(maxSeenMessages));
+    this.seenMessages = newSetFromMap(new SizeLimitedMap<>(gossipHistoryLimit));
   }
 
   @Override
