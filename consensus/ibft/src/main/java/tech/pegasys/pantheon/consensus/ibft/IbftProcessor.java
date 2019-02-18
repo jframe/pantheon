@@ -38,16 +38,9 @@ public class IbftProcessor implements Runnable {
    *
    * @param incomingQueue The event queue from which to drain new events
    * @param eventMultiplexer an object capable of handling any/all IBFT events
+   * @param roundTimerExecutor Round timer executor
    */
   public IbftProcessor(
-      final IbftEventQueue incomingQueue, final EventMultiplexer eventMultiplexer) {
-    // Spawning the round timer with a single thread as we should never have more than 1 timer in
-    // flight at a time
-    this(incomingQueue, eventMultiplexer, Executors.newSingleThreadScheduledExecutor());
-  }
-
-  @VisibleForTesting
-  IbftProcessor(
       final IbftEventQueue incomingQueue,
       final EventMultiplexer eventMultiplexer,
       final ScheduledExecutorService roundTimerExecutor) {
@@ -64,7 +57,7 @@ public class IbftProcessor implements Runnable {
   @Override
   public void run() {
     while (!shutdown) {
-      nextIbftEvent().ifPresent(event -> eventMultiplexer.handleIbftEvent(event));
+      nextIbftEvent().ifPresent(eventMultiplexer::handleIbftEvent);
     }
     // Clean up the executor service the round timer has been utilising
     LOG.info("Shutting down IBFT event processor");

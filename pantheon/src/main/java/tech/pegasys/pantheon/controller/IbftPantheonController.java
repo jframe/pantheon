@@ -12,8 +12,10 @@
  */
 package tech.pegasys.pantheon.controller;
 
+import static java.util.concurrent.Executors.newScheduledThreadPool;
 import static org.apache.logging.log4j.LogManager.getLogger;
 
+import java.util.concurrent.ScheduledExecutorService;
 import tech.pegasys.pantheon.config.GenesisConfigFile;
 import tech.pegasys.pantheon.config.IbftConfigOptions;
 import tech.pegasys.pantheon.consensus.common.BlockInterface;
@@ -205,6 +207,8 @@ public class IbftPantheonController implements PantheonController<IbftContext> {
 
     final IbftGossip gossiper = new IbftGossip(uniqueMessageMulticaster);
 
+    final ScheduledExecutorService roundTimerExecutor = newScheduledThreadPool(1);
+    final ScheduledExecutorService blockTimerExecutor = newScheduledThreadPool(1);
     final IbftFinalState finalState =
         new IbftFinalState(
             voteTally,
@@ -215,11 +219,11 @@ public class IbftPantheonController implements PantheonController<IbftContext> {
             new RoundTimer(
                 ibftEventQueue,
                 ibftConfig.getRequestTimeoutSeconds(),
-                Executors.newScheduledThreadPool(1)),
+                roundTimerExecutor),
             new BlockTimer(
                 ibftEventQueue,
                 ibftConfig.getBlockPeriodSeconds(),
-                Executors.newScheduledThreadPool(1),
+                blockTimerExecutor,
                 Clock.systemUTC()),
             blockCreatorFactory,
             new MessageFactory(nodeKeys),
@@ -249,7 +253,7 @@ public class IbftPantheonController implements PantheonController<IbftContext> {
     ibftController.start();
 
     final EventMultiplexer eventMultiplexer = new EventMultiplexer(ibftController);
-    final IbftProcessor ibftProcessor = new IbftProcessor(ibftEventQueue, eventMultiplexer);
+    final IbftProcessor ibftProcessor = new IbftProcessor(ibftEventQueue, eventMultiplexer, roundTimerExecutor);
     final ExecutorService processorExecutor = Executors.newSingleThreadExecutor();
     processorExecutor.submit(ibftProcessor);
 
