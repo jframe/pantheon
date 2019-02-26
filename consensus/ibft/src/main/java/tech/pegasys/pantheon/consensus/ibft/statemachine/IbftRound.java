@@ -84,13 +84,7 @@ public class IbftRound {
 
   public void createAndSendProposalMessage(final long headerTimeStampSeconds) {
     final Block block = blockCreator.createBlock(headerTimeStampSeconds);
-    final IbftExtraData extraData = IbftExtraData.decode(block.getHeader().getExtraData());
-    LOG.debug(
-        "Creating proposed block. round={} extraData={} blockHeader={}",
-        roundState.getRoundIdentifier(),
-        extraData,
-        block.getHeader());
-
+    LOG.debug("Creating proposed block. round={}", roundState.getRoundIdentifier());
     updateStateWithProposalAndTransmit(block, Optional.empty());
   }
 
@@ -133,7 +127,7 @@ public class IbftRound {
     final Block block = msg.getBlock();
 
     if (updateStateWithProposedBlock(msg)) {
-      LOG.debug("Sending prepare message.");
+      LOG.debug("Sending prepare message. round={}", roundState.getRoundIdentifier());
       final Prepare localPrepareMessage =
           messageFactory.createPrepare(getRoundIdentifier(), block.getHash());
       transmitter.multicastPrepare(
