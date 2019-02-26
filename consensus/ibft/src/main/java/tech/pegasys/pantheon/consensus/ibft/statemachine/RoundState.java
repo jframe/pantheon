@@ -100,7 +100,7 @@ public class RoundState {
     final long prepareQuorum = prepareMessageCountForQuorum(quorum);
     prepared = (prepareMessages.size() >= prepareQuorum) && proposalMessage.isPresent();
     committed = (commitMessages.size() >= quorum) && proposalMessage.isPresent();
-    LOG.debug(
+    LOG.trace(
         "Round state updated prepared={} committed={} prepareQuorum={} quorum={}",
         prepared,
         committed,

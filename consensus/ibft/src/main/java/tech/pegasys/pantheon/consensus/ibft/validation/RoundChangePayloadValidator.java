@@ -48,7 +48,7 @@ public class RoundChangePayloadValidator {
   public boolean validateRoundChange(final SignedData<RoundChangePayload> msg) {
 
     if (!validators.contains(msg.getAuthor())) {
-      LOG.info(
+      LOG.debug(
           "Invalid RoundChange message, was not transmitted by a validator for the associated"
               + " round.");
       return false;
@@ -57,7 +57,7 @@ public class RoundChangePayloadValidator {
     final ConsensusRoundIdentifier targetRound = msg.getPayload().getRoundIdentifier();
 
     if (targetRound.getSequenceNumber() != chainHeight) {
-      LOG.info("Invalid RoundChange message, not valid for local chain height.");
+      LOG.debug("Invalid RoundChange message, not valid for local chain height.");
       return false;
     }
 
@@ -90,12 +90,12 @@ public class RoundChangePayloadValidator {
       final PreparedCertificate certificate, final SignedDataValidator signedDataValidator) {
 
     if (!signedDataValidator.validateProposal(certificate.getProposalPayload())) {
-      LOG.info("Invalid RoundChange message, embedded Proposal message failed validation.");
+      LOG.debug("Invalid RoundChange message, embedded Proposal message failed validation.");
       return false;
     }
 
     if (certificate.getPreparePayloads().size() < minimumPrepareMessages) {
-      LOG.info(
+      LOG.debug(
           "Invalid RoundChange message, insufficient Prepare messages exist to justify "
               + "prepare certificate.");
       return false;
@@ -103,7 +103,7 @@ public class RoundChangePayloadValidator {
 
     for (final SignedData<PreparePayload> prepareMsg : certificate.getPreparePayloads()) {
       if (!signedDataValidator.validatePrepare(prepareMsg)) {
-        LOG.info("Invalid RoundChange message, embedded Prepare message failed validation.");
+        LOG.debug("Invalid RoundChange message, embedded Prepare message failed validation.");
         return false;
       }
     }
@@ -116,12 +116,12 @@ public class RoundChangePayloadValidator {
       final ConsensusRoundIdentifier roundChangeTarget) {
 
     if (prepareCertRound.getSequenceNumber() != roundChangeTarget.getSequenceNumber()) {
-      LOG.info("Invalid RoundChange message, PreparedCertificate is not for local chain height.");
+      LOG.debug("Invalid RoundChange message, PreparedCertificate is not for local chain height.");
       return false;
     }
 
     if (prepareCertRound.getRoundNumber() >= roundChangeTarget.getRoundNumber()) {
-      LOG.info(
+      LOG.debug(
           "Invalid RoundChange message, PreparedCertificate not older than RoundChange target.");
       return false;
     }

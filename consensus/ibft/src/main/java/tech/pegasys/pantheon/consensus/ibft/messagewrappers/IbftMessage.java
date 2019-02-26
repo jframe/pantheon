@@ -12,6 +12,7 @@
  */
 package tech.pegasys.pantheon.consensus.ibft.messagewrappers;
 
+import java.util.StringJoiner;
 import tech.pegasys.pantheon.consensus.ibft.ConsensusRoundIdentifier;
 import tech.pegasys.pantheon.consensus.ibft.payload.Authored;
 import tech.pegasys.pantheon.consensus.ibft.payload.Payload;
@@ -55,5 +56,12 @@ public class IbftMessage<P extends Payload> implements Authored, RoundSpecific {
 
   protected P getPayload() {
     return payload.getPayload();
+  }
+
+  @Override
+  public String toString() {
+    return new StringJoiner(", ", IbftMessage.class.getSimpleName() + "[", "]")
+        .add("payload=" + payload)
+        .toString();
   }
 }

@@ -102,11 +102,11 @@ public class IbftRound {
         roundChangeArtifacts.getRoundChangeCertificate();
     Block blockToPublish;
     if (!bestBlockFromRoundChange.isPresent()) {
-      LOG.debug("Multicasting Proposal with new block. round={}", roundState.getRoundIdentifier());
+      LOG.trace("Multicasting proposal with new block. round={}", roundState.getRoundIdentifier());
       blockToPublish = blockCreator.createBlock(headerTimestamp);
     } else {
-      LOG.debug(
-          "Multicasting Proposal from PreparedCertificate. round={}",
+      LOG.trace(
+          "Multicasting proposal from PreparedCertificate. round={}",
           roundState.getRoundIdentifier());
       blockToPublish =
           IbftBlockInterface.replaceRoundInBlock(
@@ -129,7 +129,7 @@ public class IbftRound {
   }
 
   public void handleProposalMessage(final Proposal msg) {
-    LOG.debug("Handling a Proposal message.");
+    LOG.debug("Received a proposal message. round={}", roundState.getRoundIdentifier());
     final Block block = msg.getBlock();
 
     if (updateStateWithProposedBlock(msg)) {
@@ -211,7 +211,7 @@ public class IbftRound {
         "Importing block to chain. round={}, hash={}",
         getRoundIdentifier(),
         blockToImport.getHash());
-    LOG.debug("ExtraData = {}", extraData);
+    LOG.trace("ExtraData = {}", extraData);
     final boolean result =
         blockImporter.importBlock(protocolContext, blockToImport, HeaderValidationMode.FULL);
     if (!result) {

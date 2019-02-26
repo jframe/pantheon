@@ -35,7 +35,7 @@ public class ProposalBlockConsistencyValidator {
 
     if (proposedBlock.getHeader().getNumber()
         != signedPayload.getPayload().getRoundIdentifier().getSequenceNumber()) {
-      LOG.info("Invalid proposal/block - message sequence does not align with block number.");
+      LOG.debug("Invalid proposal/block - message sequence does not align with block number.");
       return false;
     }
 
@@ -51,7 +51,7 @@ public class ProposalBlockConsistencyValidator {
     final ConsensusRoundIdentifier msgRound = payload.getRoundIdentifier();
     final IbftExtraData extraData = IbftExtraData.decode(block.getHeader().getExtraData());
     if (extraData.getRound() != msgRound.getRoundNumber()) {
-      LOG.info("Invalid Proposal message, round number in block does not match that in message.");
+      LOG.debug("Invalid Proposal message, round number in block does not match that in message.");
       return false;
     }
     return true;

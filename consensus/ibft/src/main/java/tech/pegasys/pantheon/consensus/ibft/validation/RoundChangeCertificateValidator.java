@@ -59,13 +59,13 @@ public class RoundChangeCertificateValidator {
         roundChangeCert.getRoundChangePayloads();
 
     if (roundChangeMsgs.size() < quorum) {
-      LOG.info("Invalid RoundChangeCertificate, insufficient RoundChange messages.");
+      LOG.debug("Invalid RoundChangeCertificate, insufficient RoundChange messages.");
       return false;
     }
 
     if (!roundChangeCert.getRoundChangePayloads().stream()
         .allMatch(p -> p.getPayload().getRoundIdentifier().equals(expectedRound))) {
-      LOG.info(
+      LOG.debug(
           "Invalid RoundChangeCertificate, not all embedded RoundChange messages have a "
               + "matching target round.");
       return false;
@@ -77,7 +77,7 @@ public class RoundChangeCertificateValidator {
 
     if (!roundChangeCert.getRoundChangePayloads().stream()
         .allMatch(roundChangeValidator::validateRoundChange)) {
-      LOG.info("Invalid RoundChangeCertificate, embedded RoundChange message failed validation.");
+      LOG.debug("Invalid RoundChangeCertificate, embedded RoundChange message failed validation.");
       return false;
     }
 
@@ -94,7 +94,7 @@ public class RoundChangeCertificateValidator {
         findLatestPreparedCertificate(roundChangePayloads);
 
     if (!latestPreparedCertificate.isPresent()) {
-      LOG.trace(
+      LOG.debug(
           "No round change messages have a preparedCertificate, any valid block may be proposed.");
       return true;
     }
@@ -115,7 +115,7 @@ public class RoundChangeCertificateValidator {
     if (!currentBlockWithOldRound
         .getHash()
         .equals(latestPreparedCertificate.get().getProposalPayload().getPayload().getDigest())) {
-      LOG.info(
+      LOG.debug(
           "Invalid RoundChangeCertificate, block in latest RoundChange does not match proposed block.");
       return false;
     }

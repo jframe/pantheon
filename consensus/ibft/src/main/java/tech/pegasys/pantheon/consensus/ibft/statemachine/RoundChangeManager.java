@@ -94,7 +94,7 @@ public class RoundChangeManager {
   public Optional<Collection<RoundChange>> appendRoundChangeMessage(final RoundChange msg) {
 
     if (!isMessageValid(msg)) {
-      LOG.info("RoundChange message was invalid.");
+      LOG.debug("RoundChange message was invalid.");
       return Optional.empty();
     }
 

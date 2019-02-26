@@ -115,10 +115,8 @@ public class IbftController {
 
   private <P extends IbftMessage<?>> void consumeMessage(
       final Message message, final P ibftMessage, final Consumer<P> handleMessage) {
-    LOG.debug(
-        "Received IBFT message messageType={} payload={}",
-        ibftMessage.getMessageType(),
-        ibftMessage);
+    LOG.trace(
+        "Received IBFT message messageType={}", ibftMessage.getMessageType());
     if (processMessage(ibftMessage, message)) {
       gossiper.send(message);
       handleMessage.accept(ibftMessage);
@@ -194,7 +192,7 @@ public class IbftController {
       sychronizerUpdater.updatePeerChainState(
           msgRoundIdentifier.getSequenceNumber() - 1L, rawMsg.getConnection());
     } else {
-      LOG.debug(
+      LOG.trace(
           "IBFT message discarded as it is from a previous block height messageType={} chainHeight={} eventHeight={}",
           msg.getMessageType(),
           currentHeightManager.getChainHeight(),

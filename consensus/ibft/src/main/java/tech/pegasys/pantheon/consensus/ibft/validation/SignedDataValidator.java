@@ -64,12 +64,12 @@ public class SignedDataValidator {
   private boolean validateProposalSignedDataPayload(final SignedData<ProposalPayload> msg) {
 
     if (!msg.getPayload().getRoundIdentifier().equals(roundIdentifier)) {
-      LOG.info("Invalid Proposal message, does not match current round.");
+      LOG.debug("Invalid Proposal message, does not match current round.");
       return false;
     }
 
     if (!msg.getAuthor().equals(expectedProposer)) {
-      LOG.info(
+      LOG.debug(
           "Invalid Proposal message, was not created by the proposer expected for the "
               + "associated round.");
       return false;
@@ -104,7 +104,7 @@ public class SignedDataValidator {
     }
 
     if (msg.getAuthor().equals(expectedProposer)) {
-      LOG.info("Illegal Prepare message; was sent by the round's proposer.");
+      LOG.debug("Illegal Prepare message; was sent by the round's proposer.");
       return false;
     }
 
@@ -123,7 +123,7 @@ public class SignedDataValidator {
         Util.signatureToAddress(msg.getPayload().getCommitSeal(), proposedBlockDigest);
 
     if (!commitSealCreator.equals(msg.getAuthor())) {
-      LOG.info("Invalid Commit message. Seal was not created by the message transmitter.");
+      LOG.debug("Invalid Commit message. Seal was not created by the message transmitter.");
       return false;
     }
 
@@ -134,19 +134,19 @@ public class SignedDataValidator {
       final SignedData<? extends Payload> msg, final String msgType) {
 
     if (!msg.getPayload().getRoundIdentifier().equals(roundIdentifier)) {
-      LOG.info("Invalid {} message, does not match current round.", msgType);
+      LOG.debug("Invalid {} message, does not match current round.", msgType);
       return false;
     }
 
     if (!validators.contains(msg.getAuthor())) {
-      LOG.info(
+      LOG.debug(
           "Invalid {} message, was not transmitted by a validator for the " + "associated round.",
           msgType);
       return false;
     }
 
     if (!proposal.isPresent()) {
-      LOG.info(
+      LOG.debug(
           "Unable to validate {} message. No Proposal exists against which to validate "
               + "block digest.",
           msgType);
@@ -158,7 +158,7 @@ public class SignedDataValidator {
   private boolean validateDigestMatchesProposal(final Hash digest, final String msgType) {
     final Hash proposedBlockDigest = proposal.get().getPayload().getDigest();
     if (!digest.equals(proposedBlockDigest)) {
-      LOG.info(
+      LOG.debug(
           "Illegal {} message, digest does not match the digest in the Prepare Message.", msgType);
       return false;
     }

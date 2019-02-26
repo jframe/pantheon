@@ -78,7 +78,7 @@ public class MessageValidator {
             protocolContext, block, HeaderValidationMode.LIGHT, HeaderValidationMode.FULL);
 
     if (!validationResult.isPresent()) {
-      LOG.info("Invalid Proposal message, block did not pass validation.");
+      LOG.debug("Invalid Proposal message, block did not pass validation.");
       return false;
     }
 
