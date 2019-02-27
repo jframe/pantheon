@@ -71,6 +71,8 @@ public class IbftController {
     if (!duplicateMessageTracker.hasSeenMessage(data)) {
       duplicateMessageTracker.addSeenMessage(data);
       handleMessage(msg.getMessage());
+    } else {
+      LOG.trace("Discarded duplicate message");
     }
   }
 
@@ -186,6 +188,7 @@ public class IbftController {
     if (isMsgForCurrentHeight(msgRoundIdentifier)) {
       return isMsgFromKnownValidator(msg) && ibftFinalState.isLocalNodeValidator();
     } else if (isMsgForFutureChainHeight(msgRoundIdentifier)) {
+      LOG.trace("Received message for future block height round={}", msgRoundIdentifier);
       futureMessageBuffer.addMessage(msgRoundIdentifier.getSequenceNumber(), rawMsg);
       // Notify the synchronizer the transmitting peer must have the parent block to the received
       // message's target height.
