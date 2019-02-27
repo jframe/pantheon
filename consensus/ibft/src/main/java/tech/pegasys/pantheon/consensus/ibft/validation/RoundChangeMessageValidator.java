@@ -34,12 +34,12 @@ public class RoundChangeMessageValidator {
   public boolean validateRoundChange(final RoundChange msg) {
 
     if (!roundChangePayloadValidator.validateRoundChange(msg.getSignedPayload())) {
-      LOG.debug("Invalid RoundChange message, signed data did not validate correctly.");
+      LOG.info("Invalid RoundChange message, signed data did not validate correctly.");
       return false;
     }
 
     if (msg.getPreparedCertificate().isPresent() != msg.getProposedBlock().isPresent()) {
-      LOG.debug(
+      LOG.info(
           "Invalid RoundChange message, availability of certificate does not correlate with"
               + "availability of block.");
       return false;
@@ -48,7 +48,7 @@ public class RoundChangeMessageValidator {
     if (msg.getPreparedCertificate().isPresent()) {
       if (!proposalBlockConsistencyValidator.validateProposalMatchesBlock(
           msg.getPreparedCertificate().get().getProposalPayload(), msg.getProposedBlock().get())) {
-        LOG.debug("Invalid RoundChange message, proposal did not align with supplied block.");
+        LOG.info("Invalid RoundChange message, proposal did not align with supplied block.");
         return false;
       }
     }
