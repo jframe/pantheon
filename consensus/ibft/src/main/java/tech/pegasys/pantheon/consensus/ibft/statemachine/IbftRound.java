@@ -96,11 +96,11 @@ public class IbftRound {
         roundChangeArtifacts.getRoundChangeCertificate();
     Block blockToPublish;
     if (!bestBlockFromRoundChange.isPresent()) {
-      LOG.trace("Multicasting proposal with new block. round={}", roundState.getRoundIdentifier());
+      LOG.debug("Sending proposal with new block. round={}", roundState.getRoundIdentifier());
       blockToPublish = blockCreator.createBlock(headerTimestamp);
     } else {
-      LOG.trace(
-          "Multicasting proposal from PreparedCertificate. round={}",
+      LOG.debug(
+          "Sending proposal from PreparedCertificate. round={}",
           roundState.getRoundIdentifier());
       blockToPublish =
           IbftBlockInterface.replaceRoundInBlock(
