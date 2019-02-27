@@ -116,7 +116,7 @@ public class IbftController {
   private <P extends IbftMessage<?>> void consumeMessage(
       final Message message, final P ibftMessage, final Consumer<P> handleMessage) {
     LOG.trace(
-        "Received IBFT message messageType={}", ibftMessage.getMessageType());
+        "Received IBFT {} message", ibftMessage.getClass().getSimpleName());
     if (processMessage(ibftMessage, message)) {
       gossiper.send(message);
       handleMessage.accept(ibftMessage);
