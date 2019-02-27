@@ -205,7 +205,7 @@ public class IbftRound {
         "Importing block to chain. round={}, hash={}",
         getRoundIdentifier(),
         blockToImport.getHash());
-    LOG.trace("ExtraData = {}", extraData);
+    LOG.trace("Importing block with extraData={}", extraData);
     final boolean result =
         blockImporter.importBlock(protocolContext, blockToImport, HeaderValidationMode.FULL);
     if (!result) {
