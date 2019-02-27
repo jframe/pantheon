@@ -100,8 +100,7 @@ public class IbftRound {
       blockToPublish = blockCreator.createBlock(headerTimestamp);
     } else {
       LOG.debug(
-          "Sending proposal from PreparedCertificate. round={}",
-          roundState.getRoundIdentifier());
+          "Sending proposal from PreparedCertificate. round={}", roundState.getRoundIdentifier());
       blockToPublish =
           IbftBlockInterface.replaceRoundInBlock(
               bestBlockFromRoundChange.get(),

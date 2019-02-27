@@ -12,7 +12,6 @@
  */
 package tech.pegasys.pantheon.consensus.ibft.messagewrappers;
 
-import java.util.StringJoiner;
 import tech.pegasys.pantheon.consensus.ibft.ConsensusRoundIdentifier;
 import tech.pegasys.pantheon.consensus.ibft.payload.Authored;
 import tech.pegasys.pantheon.consensus.ibft.payload.Payload;
@@ -21,6 +20,8 @@ import tech.pegasys.pantheon.consensus.ibft.payload.SignedData;
 import tech.pegasys.pantheon.ethereum.core.Address;
 import tech.pegasys.pantheon.ethereum.rlp.BytesValueRLPOutput;
 import tech.pegasys.pantheon.util.bytes.BytesValue;
+
+import java.util.StringJoiner;
 
 public class IbftMessage<P extends Payload> implements Authored, RoundSpecific {
 
