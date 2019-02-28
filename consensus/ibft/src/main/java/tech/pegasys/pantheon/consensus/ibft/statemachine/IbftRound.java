@@ -84,7 +84,10 @@ public class IbftRound {
 
   public void createAndSendProposalMessage(final long headerTimeStampSeconds) {
     final Block block = blockCreator.createBlock(headerTimeStampSeconds);
+    final IbftExtraData extraData = IbftExtraData.decode(block.getHeader().getExtraData());
     LOG.debug("Creating proposed block. round={}", roundState.getRoundIdentifier());
+    LOG.trace(
+        "Creating proposed block with extraData={} blockHeader={}", extraData, block.getHeader());
     updateStateWithProposalAndTransmit(block, Optional.empty());
   }
 
