@@ -15,6 +15,7 @@
     <Logger name="tech.pegasys.pantheon.SubProcessLog" level="INFO" additivity="false">
       <AppenderRef ref="SubProcessConsole" />
     </Logger>
+    <Logger name="tech.pegasys.pantheon.consensus.clique" LEVEL="TRACE"/>
     <Root level="${sys:root.log.level}">
       <AppenderRef ref="Console" />
     </Root>
