@@ -14,7 +14,10 @@ package tech.pegasys.pantheon.consensus.clique.jsonrpc.methods;
 
 import static tech.pegasys.pantheon.consensus.clique.CliqueBlockInterface.NO_VOTE_SUBJECT;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import tech.pegasys.pantheon.consensus.common.VoteProposer;
+import tech.pegasys.pantheon.consensus.common.VoteType;
 import tech.pegasys.pantheon.ethereum.core.Address;
 import tech.pegasys.pantheon.ethereum.jsonrpc.internal.JsonRpcRequest;
 import tech.pegasys.pantheon.ethereum.jsonrpc.internal.methods.JsonRpcMethod;
@@ -25,6 +28,7 @@ import tech.pegasys.pantheon.ethereum.jsonrpc.internal.response.JsonRpcResponse;
 import tech.pegasys.pantheon.ethereum.jsonrpc.internal.response.JsonRpcSuccessResponse;
 
 public class Propose implements JsonRpcMethod {
+  private static final Logger LOG = LogManager.getLogger();
   private final VoteProposer proposer;
   private final JsonRpcParameter parameters;
 
@@ -42,6 +46,11 @@ public class Propose implements JsonRpcMethod {
   public JsonRpcResponse response(final JsonRpcRequest request) {
     final Address address = parameters.required(request.getParams(), 0, Address.class);
     final Boolean auth = parameters.required(request.getParams(), 1, Boolean.class);
+    LOG.trace(
+        "Received RPC rpcName={} voteType={} address={}",
+        getName(),
+        auth ? VoteType.ADD : VoteType.DROP,
+        address);
     if (address.equals(NO_VOTE_SUBJECT)) {
       return new JsonRpcErrorResponse(request.getId(), JsonRpcError.INVALID_REQUEST);
     }
