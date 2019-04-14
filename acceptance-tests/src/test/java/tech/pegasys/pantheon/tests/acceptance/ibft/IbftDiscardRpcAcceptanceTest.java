@@ -29,6 +29,8 @@ public class IbftDiscardRpcAcceptanceTest extends AcceptanceTestBase {
     final PantheonNode validator3 = pantheon.createIbftNodeWithValidators("validator3", validators);
     cluster.start(validator1, validator2, validator3);
 
+    cluster.waitUntil(wait.chainHeadHasProgressedByAtLeast(validator1, 1, 85));
+
     validator1.execute(ibftTransactions.createRemoveProposal(validator2));
     validator1.execute(ibftTransactions.createAddProposal(validator3));
 
@@ -38,7 +40,7 @@ public class IbftDiscardRpcAcceptanceTest extends AcceptanceTestBase {
     validator1.execute(ibftTransactions.createDiscardProposal(validator2));
     validator1.execute(ibftTransactions.createDiscardProposal(validator3));
 
-    validator1.waitUntil(wait.chainHeadHasProgressedByAtLeast(validator1, 2));
+    cluster.waitUntil(wait.chainHeadHasProgressedByAtLeast(validator1, 2));
 
     cluster.verify(ibft.validatorsEqual(validator1, validator2));
     validator1.verify(ibft.noProposals());
