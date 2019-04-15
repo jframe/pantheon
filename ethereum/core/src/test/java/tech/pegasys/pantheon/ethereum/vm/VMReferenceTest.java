@@ -28,6 +28,7 @@ import tech.pegasys.pantheon.ethereum.vm.ehalt.ExceptionalHaltException;
 import tech.pegasys.pantheon.ethereum.worldstate.DefaultMutableWorldState;
 import tech.pegasys.pantheon.testutil.JsonTestParameters;
 
+import java.math.BigInteger;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.OptionalInt;
@@ -92,7 +93,7 @@ public class VMReferenceTest extends AbstractRetryingTest {
     "CallToPrecompiledContract",
     "createNameRegistrator"
   };
-  private static final int CHAIN_ID = 1;
+  private static final BigInteger CHAIN_ID = BigInteger.ONE;
   private final String name;
 
   private final VMReferenceTestCaseSpec spec;

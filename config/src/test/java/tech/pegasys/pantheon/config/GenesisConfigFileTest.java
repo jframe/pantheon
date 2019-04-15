@@ -16,6 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.entry;
 
+import java.math.BigInteger;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -24,8 +25,8 @@ import org.junit.Test;
 
 public class GenesisConfigFileTest {
 
-  private static final int MAINNET_CHAIN_ID = 1;
-  private static final int DEVELOPMENT_CHAIN_ID = 2018;
+  private static final BigInteger MAINNET_CHAIN_ID = BigInteger.ONE;
+  private static final BigInteger DEVELOPMENT_CHAIN_ID = BigInteger.valueOf(2018);
   private static final GenesisConfigFile EMPTY_CONFIG = GenesisConfigFile.fromConfig("{}");
 
   @Test

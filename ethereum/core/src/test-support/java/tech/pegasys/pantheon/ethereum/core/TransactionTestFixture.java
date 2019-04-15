@@ -15,6 +15,7 @@ package tech.pegasys.pantheon.ethereum.core;
 import tech.pegasys.pantheon.crypto.SECP256K1.KeyPair;
 import tech.pegasys.pantheon.util.bytes.BytesValue;
 
+import java.math.BigInteger;
 import java.util.Optional;
 
 public class TransactionTestFixture {
@@ -32,7 +33,7 @@ public class TransactionTestFixture {
 
   private BytesValue payload = BytesValue.EMPTY;
 
-  private int chainId = 2018;
+  private BigInteger chainId = BigInteger.valueOf(2018);
 
   public Transaction createTransaction(final KeyPair keys) {
     final Transaction.Builder builder = Transaction.builder();
@@ -85,7 +86,7 @@ public class TransactionTestFixture {
     return this;
   }
 
-  public TransactionTestFixture chainId(final int chainId) {
+  public TransactionTestFixture chainId(final BigInteger chainId) {
     this.chainId = chainId;
     return this;
   }

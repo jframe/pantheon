@@ -1067,6 +1067,7 @@ public class PantheonCommand implements DefaultCommandValues, Runnable {
               genesisConfigFile
                   .getConfigOptions()
                   .getChainId()
+                  .map(BigInteger::intValueExact)
                   .orElse(EthNetworkConfig.getNetworkConfig(MAINNET).getNetworkId()));
         } catch (final DecodeException e) {
           throw new ParameterException(

@@ -14,6 +14,7 @@ package tech.pegasys.pantheon.ethereum.mainnet;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import java.math.BigInteger;
 import java.util.Comparator;
 import java.util.NavigableSet;
 import java.util.TreeSet;
@@ -25,14 +26,14 @@ public class MutableProtocolSchedule<C> implements ProtocolSchedule<C> {
       new TreeSet<>(
           Comparator.<ScheduledProtocolSpec<C>, Long>comparing(ScheduledProtocolSpec::getBlock)
               .reversed());
-  private final int chainId;
+  private final BigInteger chainId;
 
-  public MutableProtocolSchedule(final int chainId) {
+  public MutableProtocolSchedule(final BigInteger chainId) {
     this.chainId = chainId;
   }
 
   @Override
-  public int getChainId() {
+  public BigInteger getChainId() {
     return chainId;
   }
 

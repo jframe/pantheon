@@ -19,13 +19,15 @@ import tech.pegasys.pantheon.ethereum.jsonrpc.internal.response.JsonRpcResponse;
 import tech.pegasys.pantheon.ethereum.jsonrpc.internal.response.JsonRpcSuccessResponse;
 import tech.pegasys.pantheon.ethereum.jsonrpc.internal.results.Quantity;
 
+import java.math.BigInteger;
+
 import org.junit.Before;
 import org.junit.Test;
 
 public class EthChainIdTest {
 
   private EthChainId method;
-  private final int CHAIN_ID = 1;
+  private final BigInteger CHAIN_ID = BigInteger.ONE;
 
   @Before
   public void setUp() {

@@ -15,6 +15,7 @@ package tech.pegasys.pantheon.ethereum.mainnet;
 import tech.pegasys.pantheon.config.GenesisConfigOptions;
 import tech.pegasys.pantheon.ethereum.core.PrivacyParameters;
 
+import java.math.BigInteger;
 import java.util.OptionalLong;
 import java.util.function.Function;
 
@@ -25,12 +26,12 @@ public class ProtocolScheduleBuilder<C> {
   private static final Logger LOG = LogManager.getLogger();
   private final GenesisConfigOptions config;
   private final Function<ProtocolSpecBuilder<Void>, ProtocolSpecBuilder<C>> protocolSpecAdapter;
-  private final int defaultChainId;
+  private final BigInteger defaultChainId;
   private final PrivacyParameters privacyParameters;
 
   public ProtocolScheduleBuilder(
       final GenesisConfigOptions config,
-      final int defaultChainId,
+      final BigInteger defaultChainId,
       final Function<ProtocolSpecBuilder<Void>, ProtocolSpecBuilder<C>> protocolSpecAdapter,
       final PrivacyParameters privacyParameters) {
     this.config = config;
@@ -40,7 +41,7 @@ public class ProtocolScheduleBuilder<C> {
   }
 
   public ProtocolSchedule<C> createProtocolSchedule() {
-    final int chainId = config.getChainId().orElse(defaultChainId);
+    final BigInteger chainId = config.getChainId().orElse(defaultChainId);
     final MutableProtocolSchedule<C> protocolSchedule = new MutableProtocolSchedule<>(chainId);
 
     validateForkOrdering();

@@ -12,7 +12,9 @@
  */
 package tech.pegasys.pantheon.config;
 
+import java.math.BigInteger;
 import java.util.Map;
+import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
 
@@ -119,10 +121,11 @@ public class JsonGenesisConfigOptions implements GenesisConfigOptions {
   }
 
   @Override
-  public OptionalInt getChainId() {
+  public Optional<BigInteger> getChainId() {
+    // TODO JsonObject limits value to long, allow big integer values in config
     return configRoot.containsKey("chainid")
-        ? OptionalInt.of(configRoot.getInteger("chainid"))
-        : OptionalInt.empty();
+        ? Optional.of(BigInteger.valueOf(configRoot.getLong("chainid")))
+        : Optional.empty();
   }
 
   @Override
@@ -135,7 +138,7 @@ public class JsonGenesisConfigOptions implements GenesisConfigOptions {
   @Override
   public Map<String, Object> asMap() {
     final ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
-    builder.put("chainId", getChainId().getAsInt());
+    builder.put("chainId", getChainId().get());
     getHomesteadBlockNumber().ifPresent(l -> builder.put("homesteadBlock", l));
     getDaoForkBlock()
         .ifPresent(

@@ -22,6 +22,7 @@ import tech.pegasys.pantheon.util.bytes.Bytes32;
 import tech.pegasys.pantheon.util.bytes.BytesValue;
 import tech.pegasys.pantheon.util.uint.UInt256;
 
+import java.math.BigInteger;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -249,7 +250,7 @@ public class BlockDataGenerator {
         .to(address())
         .value(Wei.wrap(bytes32()))
         .payload(bytes32())
-        .chainId(1)
+        .chainId(BigInteger.ONE)
         .signAndBuild(SECP256K1.KeyPair.generate());
   }
 

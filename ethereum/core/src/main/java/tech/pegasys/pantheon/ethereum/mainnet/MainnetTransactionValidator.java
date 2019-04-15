@@ -27,7 +27,8 @@ import tech.pegasys.pantheon.ethereum.core.Transaction;
 import tech.pegasys.pantheon.ethereum.core.Wei;
 import tech.pegasys.pantheon.ethereum.vm.GasCalculator;
 
-import java.util.OptionalInt;
+import java.math.BigInteger;
+import java.util.Optional;
 
 /**
  * Validates a transaction based on Frontier protocol runtime requirements.
@@ -37,7 +38,7 @@ import java.util.OptionalInt;
  */
 public class MainnetTransactionValidator implements TransactionValidator {
 
-  public static final int NO_CHAIN_ID = -1;
+  public static final BigInteger NO_CHAIN_ID = BigInteger.valueOf(-1);
 
   public static MainnetTransactionValidator create() {
     return new MainnetTransactionValidator(new FrontierGasCalculator(), false);
@@ -47,7 +48,7 @@ public class MainnetTransactionValidator implements TransactionValidator {
 
   private final boolean disallowSignatureMalleability;
 
-  private final OptionalInt chainId;
+  private final Optional<BigInteger> chainId;
 
   public MainnetTransactionValidator(
       final GasCalculator gasCalculator, final boolean checkSignatureMalleability) {
@@ -57,10 +58,10 @@ public class MainnetTransactionValidator implements TransactionValidator {
   public MainnetTransactionValidator(
       final GasCalculator gasCalculator,
       final boolean checkSignatureMalleability,
-      final int chainId) {
+      final BigInteger chainId) {
     this.gasCalculator = gasCalculator;
     this.disallowSignatureMalleability = checkSignatureMalleability;
-    this.chainId = chainId > 0 ? OptionalInt.of(chainId) : OptionalInt.empty();
+    this.chainId = chainId.signum() >= 1 ? Optional.of(chainId) : Optional.empty();
   }
 
   @Override
@@ -130,7 +131,7 @@ public class MainnetTransactionValidator implements TransactionValidator {
           WRONG_CHAIN_ID,
           String.format(
               "transaction was meant for chain id %s and not this chain id %s",
-              transaction.getChainId().getAsInt(), chainId.getAsInt()));
+              transaction.getChainId().get(), chainId.get()));
     }
 
     if (!chainId.isPresent() && transaction.getChainId().isPresent()) {

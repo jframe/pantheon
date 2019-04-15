@@ -28,7 +28,6 @@ import tech.pegasys.pantheon.util.uint.UInt256;
 import java.math.BigInteger;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.OptionalInt;
 
 /** An operation submitted by an external actor to be applied to the system. */
 public class Transaction {
@@ -57,7 +56,7 @@ public class Transaction {
 
   private final BytesValue payload;
 
-  private final OptionalInt chainId;
+  private final Optional<BigInteger> chainId;
 
   // Caches a "hash" of a portion of the transaction used for sender recovery.
   // Note that this hash does not include the transaction signature so it does not
@@ -87,14 +86,21 @@ public class Transaction {
             .value(input.readUInt256Scalar(Wei::wrap))
             .payload(input.readBytesValue());
 
-    final int v = input.readIntScalar();
+    final BigInteger v = input.readBigIntegerScalar();
     final byte recId;
-    int chainId = -1;
-    if (v == REPLAY_UNPROTECTED_V_BASE || v == REPLAY_UNPROTECTED_V_BASE + 1) {
-      recId = (byte) (v - REPLAY_UNPROTECTED_V_BASE);
-    } else if (v > REPLAY_PROTECTED_V_MIN) {
-      chainId = (v - REPLAY_PROTECTED_V_BASE) / 2;
-      recId = (byte) (v - (2 * chainId + REPLAY_PROTECTED_V_BASE));
+    BigInteger chainId = BigInteger.valueOf(-1);
+    if (v.intValue() == REPLAY_UNPROTECTED_V_BASE
+        || v.intValue() == REPLAY_UNPROTECTED_V_BASE + 1) {
+      recId = v.subtract(BigInteger.valueOf(REPLAY_UNPROTECTED_V_BASE)).byteValue();
+    } else if (v.compareTo(BigInteger.valueOf(REPLAY_PROTECTED_V_MIN)) > 0) {
+      chainId =
+          (v.subtract(BigInteger.valueOf(REPLAY_PROTECTED_V_BASE)).divide(BigInteger.valueOf(2)));
+      recId =
+          v.subtract(
+                  BigInteger.valueOf(2)
+                      .multiply(chainId)
+                      .add(BigInteger.valueOf(REPLAY_PROTECTED_V_BASE)))
+              .byteValue();
     } else {
       throw new RuntimeException(
           String.format("An unsupported encoded `v` value of %s was found", v));
@@ -134,7 +140,7 @@ public class Transaction {
       final SECP256K1.Signature signature,
       final BytesValue payload,
       final Address sender,
-      final int chainId) {
+      final BigInteger chainId) {
     this.nonce = nonce;
     this.gasPrice = gasPrice;
     this.gasLimit = gasLimit;
@@ -143,7 +149,7 @@ public class Transaction {
     this.signature = signature;
     this.payload = payload;
     this.sender = sender;
-    this.chainId = chainId > 0 ? OptionalInt.of(chainId) : OptionalInt.empty();
+    this.chainId = chainId.signum() == 1 ? Optional.of(chainId) : Optional.empty();
   }
 
   /**
@@ -220,7 +226,7 @@ public class Transaction {
    *
    * @return the transaction chain id if it exists; otherwise {@code OptionalInt.empty()}
    */
-  public OptionalInt getChainId() {
+  public Optional<BigInteger> getChainId() {
     return chainId;
   }
 
@@ -271,7 +277,7 @@ public class Transaction {
   }
 
   private void writeSignature(final RLPOutput out) {
-    out.writeIntScalar(getV());
+    out.writeBigIntegerScalar(getV());
     out.writeBigIntegerScalar(getSignature().getR());
     out.writeBigIntegerScalar(getSignature().getS());
   }
@@ -284,12 +290,14 @@ public class Transaction {
     return signature.getS();
   }
 
-  public int getV() {
-    final int v;
+  public BigInteger getV() {
+    final BigInteger v;
     if (!chainId.isPresent()) {
-      v = signature.getRecId() + REPLAY_UNPROTECTED_V_BASE;
+      v = BigInteger.valueOf(signature.getRecId() + REPLAY_UNPROTECTED_V_BASE);
     } else {
-      v = (getSignature().getRecId() + REPLAY_PROTECTED_V_BASE + 2 * chainId.getAsInt());
+      v =
+          BigInteger.valueOf(getSignature().getRecId() + REPLAY_PROTECTED_V_BASE)
+              .add(chainId.get().multiply(BigInteger.valueOf(2)));
     }
     return v;
   }
@@ -345,7 +353,7 @@ public class Transaction {
       final Address to,
       final Wei value,
       final BytesValue payload,
-      final OptionalInt chainId) {
+      final Optional<BigInteger> chainId) {
     return keccak256(
         RLP.encode(
             out -> {
@@ -357,7 +365,7 @@ public class Transaction {
               out.writeUInt256Scalar(value);
               out.writeBytesValue(payload);
               if (chainId.isPresent()) {
-                out.writeIntScalar(chainId.getAsInt());
+                out.writeBigIntegerScalar(chainId.get());
                 out.writeUInt256Scalar(UInt256.ZERO);
                 out.writeUInt256Scalar(UInt256.ZERO);
               }
@@ -396,7 +404,7 @@ public class Transaction {
     if (getTo().isPresent()) sb.append("to=").append(getTo().get()).append(", ");
     sb.append("value=").append(getValue()).append(", ");
     sb.append("sig=").append(getSignature()).append(", ");
-    if (chainId.isPresent()) sb.append("chainId=").append(getChainId().getAsInt()).append(", ");
+    if (chainId.isPresent()) sb.append("chainId=").append(getChainId().get()).append(", ");
     sb.append("payload=").append(getPayload());
     return sb.append("}").toString();
   }
@@ -426,9 +434,9 @@ public class Transaction {
 
     protected Address sender;
 
-    protected int chainId = -1;
+    protected BigInteger chainId = BigInteger.valueOf(-1);
 
-    public Builder chainId(final int chainId) {
+    public Builder chainId(final BigInteger chainId) {
       this.chainId = chainId;
       return this;
     }
@@ -495,8 +503,8 @@ public class Transaction {
     }
 
     protected SECP256K1.Signature computeSignature(final SECP256K1.KeyPair keys) {
-      final OptionalInt optionalChainId =
-          chainId > 0 ? OptionalInt.of(chainId) : OptionalInt.empty();
+      final Optional<BigInteger> optionalChainId =
+          chainId.signum() > 0 ? Optional.of(chainId) : Optional.empty();
       final Bytes32 hash =
           computeSenderRecoveryHash(nonce, gasPrice, gasLimit, to, value, payload, optionalChainId);
       return SECP256K1.sign(hash, keys);

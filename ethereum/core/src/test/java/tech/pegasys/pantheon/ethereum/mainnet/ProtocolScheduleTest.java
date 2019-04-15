@@ -15,12 +15,14 @@ package tech.pegasys.pantheon.ethereum.mainnet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
+import java.math.BigInteger;
+
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
 public class ProtocolScheduleTest {
 
-  private static final int CHAIN_ID = 1;
+  private static final BigInteger CHAIN_ID = BigInteger.ONE;
 
   @SuppressWarnings("unchecked")
   @Test

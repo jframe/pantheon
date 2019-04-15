@@ -33,6 +33,7 @@ import tech.pegasys.pantheon.ethereum.permissioning.NodeLocalConfigPermissioning
 import tech.pegasys.pantheon.metrics.noop.NoOpMetricsSystem;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -93,7 +94,9 @@ public class JsonRpcHttpServiceHostWhitelistTest {
                     blockchainQueries,
                     synchronizer,
                     MainnetProtocolSchedule.fromConfig(
-                        new StubGenesisConfigOptions().constantinopleBlock(0).chainId(CHAIN_ID)),
+                        new StubGenesisConfigOptions()
+                            .constantinopleBlock(0)
+                            .chainId(BigInteger.valueOf(CHAIN_ID))),
                     mock(FilterManager.class),
                     mock(TransactionPool.class),
                     mock(EthHashMiningCoordinator.class),

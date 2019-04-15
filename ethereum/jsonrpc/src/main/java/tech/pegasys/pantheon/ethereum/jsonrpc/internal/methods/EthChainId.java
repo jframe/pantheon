@@ -17,11 +17,13 @@ import tech.pegasys.pantheon.ethereum.jsonrpc.internal.response.JsonRpcResponse;
 import tech.pegasys.pantheon.ethereum.jsonrpc.internal.response.JsonRpcSuccessResponse;
 import tech.pegasys.pantheon.ethereum.jsonrpc.internal.results.Quantity;
 
+import java.math.BigInteger;
+
 public class EthChainId implements JsonRpcMethod {
 
-  private final int chainId;
+  private final BigInteger chainId;
 
-  public EthChainId(final int chainId) {
+  public EthChainId(final BigInteger chainId) {
     this.chainId = chainId;
   }
 

@@ -31,6 +31,8 @@ import tech.pegasys.pantheon.ethereum.mainnet.ProtocolSchedule;
 import tech.pegasys.pantheon.ethereum.mainnet.ProtocolSpec;
 import tech.pegasys.pantheon.util.Subscribers;
 
+import java.math.BigInteger;
+
 import com.google.common.collect.Lists;
 import org.junit.Test;
 
@@ -124,7 +126,8 @@ public class BlockMinerTest {
   }
 
   private ProtocolSchedule<Void> singleSpecSchedule(final ProtocolSpec<Void> protocolSpec) {
-    final MutableProtocolSchedule<Void> protocolSchedule = new MutableProtocolSchedule<>(1234);
+    final MutableProtocolSchedule<Void> protocolSchedule =
+        new MutableProtocolSchedule<>(BigInteger.valueOf(1234));
     protocolSchedule.putMilestone(0, protocolSpec);
     return protocolSchedule;
   }

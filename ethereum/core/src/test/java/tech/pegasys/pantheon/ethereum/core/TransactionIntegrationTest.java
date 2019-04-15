@@ -21,6 +21,8 @@ import tech.pegasys.pantheon.ethereum.rlp.RLP;
 import tech.pegasys.pantheon.ethereum.rlp.RLPInput;
 import tech.pegasys.pantheon.util.bytes.BytesValue;
 
+import java.math.BigInteger;
+
 import org.junit.Test;
 
 public class TransactionIntegrationTest {
@@ -35,7 +37,7 @@ public class TransactionIntegrationTest {
     final Transaction transaction = Transaction.readFrom(input);
     assertNotNull(transaction);
     assertTrue(transaction.isContractCreation());
-    assertEquals(2018, transaction.getChainId().getAsInt());
+    assertEquals(BigInteger.valueOf(2018), transaction.getChainId().get());
     assertEquals(
         Address.fromHexString("0xfe3b557e8fb62b89f4916b721be55ceb828dbd73"),
         transaction.getSender());

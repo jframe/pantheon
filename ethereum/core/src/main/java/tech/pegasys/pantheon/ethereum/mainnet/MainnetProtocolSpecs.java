@@ -26,6 +26,7 @@ import tech.pegasys.pantheon.ethereum.core.WorldUpdater;
 import tech.pegasys.pantheon.ethereum.privacy.PrivateTransactionProcessor;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.OptionalInt;
@@ -160,7 +161,7 @@ public abstract class MainnetProtocolSpecs {
   }
 
   public static ProtocolSpecBuilder<Void> spuriousDragonDefinition(
-      final int chainId, final OptionalInt configContractSizeLimit) {
+      final BigInteger chainId, final OptionalInt configContractSizeLimit) {
     final int contractSizeLimit =
         configContractSizeLimit.orElse(SPURIOUS_DRAGON_CONTRACT_SIZE_LIMIT);
     return tangerineWhistleDefinition(OptionalInt.empty())
@@ -208,7 +209,7 @@ public abstract class MainnetProtocolSpecs {
   }
 
   public static ProtocolSpecBuilder<Void> byzantiumDefinition(
-      final int chainId, final OptionalInt contractSizeLimit) {
+      final BigInteger chainId, final OptionalInt contractSizeLimit) {
     return spuriousDragonDefinition(chainId, contractSizeLimit)
         .evmBuilder(MainnetEvmRegistries::byzantium)
         .precompileContractRegistryBuilder(MainnetPrecompiledContractRegistries::byzantium)
@@ -220,7 +221,7 @@ public abstract class MainnetProtocolSpecs {
   }
 
   public static ProtocolSpecBuilder<Void> constantinopleDefinition(
-      final int chainId, final OptionalInt contractSizeLimit) {
+      final BigInteger chainId, final OptionalInt contractSizeLimit) {
     return byzantiumDefinition(chainId, contractSizeLimit)
         .difficultyCalculator(MainnetDifficultyCalculators.CONSTANTINOPLE)
         .gasCalculator(ConstantinopleGasCalculator::new)
@@ -230,7 +231,7 @@ public abstract class MainnetProtocolSpecs {
   }
 
   public static ProtocolSpecBuilder<Void> constantinopleFixDefinition(
-      final int chainId, final OptionalInt contractSizeLimit) {
+      final BigInteger chainId, final OptionalInt contractSizeLimit) {
     return constantinopleDefinition(chainId, contractSizeLimit)
         .gasCalculator(ConstantinopleFixGasCalculator::new)
         .name("ConstantinopleFix");
