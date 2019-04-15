@@ -23,11 +23,11 @@ import org.awaitility.Awaitility;
 public interface PantheonNodeRunner {
 
   static PantheonNodeRunner instance() {
-    //    if (Boolean.getBoolean("acctests.runPantheonAsProcess")) {
-    return new ProcessPantheonNodeRunner();
-    //    } else {
-    //      return new ThreadPantheonNodeRunner();
-    //    }
+    if (Boolean.getBoolean("acctests.runPantheonAsProcess")) {
+      return new ProcessPantheonNodeRunner();
+    } else {
+      return new ThreadPantheonNodeRunner();
+    }
   }
 
   void startNode(PantheonNode node);
