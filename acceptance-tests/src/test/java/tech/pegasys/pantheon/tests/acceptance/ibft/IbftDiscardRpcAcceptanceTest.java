@@ -18,6 +18,7 @@ import tech.pegasys.pantheon.tests.acceptance.dsl.node.PantheonNode;
 import java.io.IOException;
 
 import org.junit.Test;
+import tech.pegasys.pantheon.tests.acceptance.dsl.waitcondition.WaitCondition;
 
 public class IbftDiscardRpcAcceptanceTest extends AcceptanceTestBase {
 
@@ -30,6 +31,7 @@ public class IbftDiscardRpcAcceptanceTest extends AcceptanceTestBase {
     cluster.start(validator1, validator2, validator3);
 
     cluster.waitUntil(wait.chainHeadHasProgressedByAtLeast(validator1, 1, 85));
+    final WaitCondition validatorsChanged = wait.ibftValidatorsChanged(validator1);
 
     validator1.execute(ibftTransactions.createRemoveProposal(validator2));
     validator1.execute(ibftTransactions.createAddProposal(validator3));
@@ -38,12 +40,11 @@ public class IbftDiscardRpcAcceptanceTest extends AcceptanceTestBase {
     validator2.execute(ibftTransactions.createAddProposal(validator3));
 
     validator1.execute(ibftTransactions.createDiscardProposal(validator2));
-    validator1.execute(ibftTransactions.createDiscardProposal(validator3));
 
-    cluster.waitUntil(wait.chainHeadHasProgressedByAtLeast(validator1, 2));
+    cluster.waitUntil(validatorsChanged);
 
-    cluster.verify(ibft.validatorsEqual(validator1, validator2));
-    validator1.verify(ibft.noProposals());
+    cluster.verify(ibft.validatorsEqual(validator1, validator2, validator3));
+    validator1.verify(ibft.pendingVotesEqual().addProposal(validator3).build());
     validator2.verify(
         ibft.pendingVotesEqual().removeProposal(validator2).addProposal(validator3).build());
   }
