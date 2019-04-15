@@ -14,11 +14,11 @@ package tech.pegasys.pantheon.tests.acceptance.clique;
 
 import tech.pegasys.pantheon.tests.acceptance.dsl.AcceptanceTestBase;
 import tech.pegasys.pantheon.tests.acceptance.dsl.node.PantheonNode;
+import tech.pegasys.pantheon.tests.acceptance.dsl.waitcondition.WaitCondition;
 
 import java.io.IOException;
 
 import org.junit.Test;
-import tech.pegasys.pantheon.tests.acceptance.dsl.waitcondition.WaitCondition;
 
 public class CliqueDiscardRpcAcceptanceTest extends AcceptanceTestBase {
 
