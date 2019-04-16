@@ -34,13 +34,16 @@ public class Transaction {
 
   // Used for transactions that are not tied to a specific chain
   // (e.g. does not have a chain id associated with it).
-  private static final int REPLAY_UNPROTECTED_V_BASE = 27;
+  private static final BigInteger REPLAY_UNPROTECTED_V_BASE = BigInteger.valueOf(27);
+  private static final BigInteger REPLAY_UNPROTECTED_V_BASE_PLUS_1 = BigInteger.valueOf(28);
 
-  private static final int REPLAY_PROTECTED_V_BASE = 35;
+  private static final BigInteger REPLAY_PROTECTED_V_BASE = BigInteger.valueOf(35);
 
   // The v signature parameter starts at 36 because 1 is the first valid chainId so:
   // chainId > 1 implies that 2 * chainId + V_BASE > 36.
-  private static final int REPLAY_PROTECTED_V_MIN = 36;
+  private static final BigInteger REPLAY_PROTECTED_V_MIN = BigInteger.valueOf(36);
+
+  private static final BigInteger TWO = BigInteger.valueOf(2);
 
   private final long nonce;
 
@@ -89,18 +92,11 @@ public class Transaction {
     final BigInteger v = input.readBigIntegerScalar();
     final byte recId;
     BigInteger chainId = BigInteger.valueOf(-1);
-    if (v.intValue() == REPLAY_UNPROTECTED_V_BASE
-        || v.intValue() == REPLAY_UNPROTECTED_V_BASE + 1) {
-      recId = v.subtract(BigInteger.valueOf(REPLAY_UNPROTECTED_V_BASE)).byteValue();
-    } else if (v.compareTo(BigInteger.valueOf(REPLAY_PROTECTED_V_MIN)) > 0) {
-      chainId =
-          (v.subtract(BigInteger.valueOf(REPLAY_PROTECTED_V_BASE)).divide(BigInteger.valueOf(2)));
-      recId =
-          v.subtract(
-                  BigInteger.valueOf(2)
-                      .multiply(chainId)
-                      .add(BigInteger.valueOf(REPLAY_PROTECTED_V_BASE)))
-              .byteValue();
+    if (v.equals(REPLAY_UNPROTECTED_V_BASE) || v.equals(REPLAY_UNPROTECTED_V_BASE_PLUS_1)) {
+      recId = v.subtract(REPLAY_UNPROTECTED_V_BASE).byteValue();
+    } else if (v.compareTo(REPLAY_PROTECTED_V_MIN) > 0) {
+      chainId = v.subtract(REPLAY_PROTECTED_V_BASE).divide(TWO);
+      recId = v.subtract(TWO.multiply(chainId).add(REPLAY_PROTECTED_V_BASE)).byteValue();
     } else {
       throw new RuntimeException(
           String.format("An unsupported encoded `v` value of %s was found", v));
@@ -252,7 +248,7 @@ public class Transaction {
     if (hashNoSignature == null) {
       hashNoSignature =
           computeSenderRecoveryHash(
-              nonce, gasPrice, gasLimit, to.isPresent() ? to.get() : null, value, payload, chainId);
+              nonce, gasPrice, gasLimit, to.orElse(null), value, payload, chainId);
     }
     return hashNoSignature;
   }
@@ -292,12 +288,11 @@ public class Transaction {
 
   public BigInteger getV() {
     final BigInteger v;
+    final BigInteger recId = BigInteger.valueOf(signature.getRecId());
     if (!chainId.isPresent()) {
-      v = BigInteger.valueOf(signature.getRecId() + REPLAY_UNPROTECTED_V_BASE);
+      v = recId.add(REPLAY_UNPROTECTED_V_BASE);
     } else {
-      v =
-          BigInteger.valueOf(getSignature().getRecId() + REPLAY_PROTECTED_V_BASE)
-              .add(chainId.get().multiply(BigInteger.valueOf(2)));
+      v = recId.add(REPLAY_PROTECTED_V_BASE).add(chainId.get().multiply(TWO));
     }
     return v;
   }
