@@ -12,6 +12,7 @@
  */
 package tech.pegasys.pantheon.config;
 
+import java.math.BigInteger;
 import java.util.OptionalLong;
 
 import io.vertx.core.json.JsonObject;
@@ -21,5 +22,9 @@ public class ConfigUtil {
     return jsonObject.containsKey(key)
         ? OptionalLong.of(jsonObject.getLong(key))
         : OptionalLong.empty();
+  }
+
+  public static BigInteger getBigInteger(final JsonObject jsonObject, final String key) {
+    return jsonObject.containsKey(key) ? (BigInteger) jsonObject.getValue(key) : null;
   }
 }

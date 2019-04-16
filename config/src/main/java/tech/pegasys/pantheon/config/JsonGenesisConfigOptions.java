@@ -122,9 +122,8 @@ public class JsonGenesisConfigOptions implements GenesisConfigOptions {
 
   @Override
   public Optional<BigInteger> getChainId() {
-    // TODO JsonObject limits value to long, allow big integer values in config
     return configRoot.containsKey("chainid")
-        ? Optional.of(BigInteger.valueOf(configRoot.getLong("chainid")))
+        ? Optional.ofNullable(ConfigUtil.getBigInteger(configRoot, "chainid"))
         : Optional.empty();
   }
 
