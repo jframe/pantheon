@@ -1072,6 +1072,9 @@ public class PantheonCommand implements DefaultCommandValues, Runnable {
         } catch (final DecodeException e) {
           throw new ParameterException(
               this.commandLine, String.format("Unable to parse genesis file %s.", genesisFile), e);
+        } catch (final ArithmeticException e) {
+          throw new ParameterException(this.commandLine, "No networkId specified and chainId in "
+              + "genesis file is too large to be used as a networkId");
         }
       }
 
