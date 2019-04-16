@@ -129,7 +129,8 @@ public class GenesisConfigOptionsTest {
 
   @Test
   public void shouldGetChainIdWhenSpecified() {
-    final GenesisConfigOptions config = fromConfigOptions(singletonMap("chainId", 32));
+    final GenesisConfigOptions config =
+        fromConfigOptions(singletonMap("chainId", BigInteger.valueOf(32)));
     assertThat(config.getChainId()).hasValue(BigInteger.valueOf(32));
   }
 

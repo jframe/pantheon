@@ -25,6 +25,13 @@ public class ConfigUtil {
   }
 
   public static BigInteger getBigInteger(final JsonObject jsonObject, final String key) {
-    return jsonObject.containsKey(key) ? (BigInteger) jsonObject.getValue(key) : null;
+    final Number value = (Number) jsonObject.getMap().get(key);
+    if (value == null) {
+      return null;
+    } else if (value instanceof BigInteger) {
+      return (BigInteger) value;
+    } else {
+      return BigInteger.valueOf(value.longValue());
+    }
   }
 }
