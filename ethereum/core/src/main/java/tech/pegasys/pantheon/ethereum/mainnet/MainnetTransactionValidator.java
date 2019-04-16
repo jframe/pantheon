@@ -61,7 +61,7 @@ public class MainnetTransactionValidator implements TransactionValidator {
       final BigInteger chainId) {
     this.gasCalculator = gasCalculator;
     this.disallowSignatureMalleability = checkSignatureMalleability;
-    this.chainId = chainId.signum() >= 1 ? Optional.of(chainId) : Optional.empty();
+    this.chainId = chainId.signum() == 1 ? Optional.of(chainId) : Optional.empty();
   }
 
   @Override

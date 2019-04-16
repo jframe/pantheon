@@ -292,7 +292,7 @@ public class Transaction {
     if (!chainId.isPresent()) {
       v = recId.add(REPLAY_UNPROTECTED_V_BASE);
     } else {
-      v = recId.add(REPLAY_PROTECTED_V_BASE).add(chainId.get().multiply(TWO));
+      v = recId.add(REPLAY_PROTECTED_V_BASE).add(TWO.multiply(chainId.get()));
     }
     return v;
   }
@@ -499,7 +499,7 @@ public class Transaction {
 
     protected SECP256K1.Signature computeSignature(final SECP256K1.KeyPair keys) {
       final Optional<BigInteger> optionalChainId =
-          chainId.signum() > 0 ? Optional.of(chainId) : Optional.empty();
+          chainId.signum() == 1 ? Optional.of(chainId) : Optional.empty();
       final Bytes32 hash =
           computeSenderRecoveryHash(nonce, gasPrice, gasLimit, to, value, payload, optionalChainId);
       return SECP256K1.sign(hash, keys);
