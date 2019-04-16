@@ -93,10 +93,10 @@ public class Transaction {
     final byte recId;
     BigInteger chainId = BigInteger.valueOf(-1);
     if (v.equals(REPLAY_UNPROTECTED_V_BASE) || v.equals(REPLAY_UNPROTECTED_V_BASE_PLUS_1)) {
-      recId = v.subtract(REPLAY_UNPROTECTED_V_BASE).byteValue();
+      recId = v.subtract(REPLAY_UNPROTECTED_V_BASE).byteValueExact();
     } else if (v.compareTo(REPLAY_PROTECTED_V_MIN) > 0) {
       chainId = v.subtract(REPLAY_PROTECTED_V_BASE).divide(TWO);
-      recId = v.subtract(TWO.multiply(chainId).add(REPLAY_PROTECTED_V_BASE)).byteValue();
+      recId = v.subtract(TWO.multiply(chainId).add(REPLAY_PROTECTED_V_BASE)).byteValueExact();
     } else {
       throw new RuntimeException(
           String.format("An unsupported encoded `v` value of %s was found", v));
