@@ -13,6 +13,7 @@
 package tech.pegasys.pantheon.ethereum.core;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -53,5 +54,23 @@ public class TransactionIntegrationTest {
     final BytesValueRLPOutput output = new BytesValueRLPOutput();
     transaction.writeTo(output);
     assertEquals(encodedString, output.encoded().toString());
+  }
+
+  @Test
+  public void shouldDecodeTransactionWithLargeChainId() {
+    final String encodedString =
+        "0xf86a018609184e72a0008276c094d30c3d13b07029deba00de1da369cd69a02c20560180850100000021a07d344f26d7329e8932d2878b99f07b12752bbd13a0b3b822644dbf9600fe718da01d6e6b6c66e1aadf4e33e318a7eef03d3bd3602de52662f0cb5af5b372d44dcd";
+    final BytesValue encoded = BytesValue.fromHexString(encodedString);
+    final RLPInput input = RLP.input(encoded);
+    final Transaction transaction = Transaction.readFrom(input);
+    assertNotNull(transaction);
+    assertFalse(transaction.isContractCreation());
+    assertEquals(BigInteger.valueOf(2147483647), transaction.getChainId().get());
+    assertEquals(
+        Address.fromHexString("0xdf664d0d2270ef97b48f222e3187bd14c8ca9428"),
+        transaction.getSender());
+    assertEquals(
+        Address.fromHexString("0xd30c3d13b07029deba00de1da369cd69a02c2056"),
+        transaction.getTo().get());
   }
 }
