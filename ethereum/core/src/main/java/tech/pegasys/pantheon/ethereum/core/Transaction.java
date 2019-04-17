@@ -107,7 +107,8 @@ public class Transaction {
 
     input.leaveList();
 
-    return builder.chainId(chainId).signature(signature).build();
+    chainId.ifPresent(builder::chainId);
+    return builder.signature(signature).build();
   }
 
   /**
@@ -430,11 +431,6 @@ public class Transaction {
     protected Address sender;
 
     protected Optional<BigInteger> chainId = Optional.empty();
-
-    public Builder chainId(final Optional<BigInteger> chainId) {
-      this.chainId = chainId;
-      return this;
-    }
 
     public Builder chainId(final BigInteger chainId) {
       this.chainId = Optional.of(chainId);

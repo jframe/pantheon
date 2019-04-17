@@ -43,10 +43,10 @@ public class TransactionTestFixture {
         .nonce(nonce)
         .payload(payload)
         .value(value)
-        .sender(sender)
-        .chainId(chainId);
+        .sender(sender);
 
     to.ifPresent(builder::to);
+    chainId.ifPresent(builder::chainId);
 
     return builder.signAndBuild(keys);
   }
