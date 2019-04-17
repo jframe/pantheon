@@ -12,6 +12,8 @@
  */
 package tech.pegasys.pantheon.config;
 
+import static tech.pegasys.pantheon.config.ConfigUtil.getOptionalBigInteger;
+
 import java.math.BigInteger;
 import java.util.Map;
 import java.util.Optional;
@@ -122,9 +124,7 @@ public class JsonGenesisConfigOptions implements GenesisConfigOptions {
 
   @Override
   public Optional<BigInteger> getChainId() {
-    return configRoot.containsKey("chainid")
-        ? Optional.ofNullable(ConfigUtil.getBigInteger(configRoot, "chainid"))
-        : Optional.empty();
+    return getOptionalBigInteger(configRoot, "chainId");
   }
 
   @Override
