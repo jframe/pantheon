@@ -12,21 +12,22 @@
  */
 package tech.pegasys.pantheon.ethereum.difficulty.fixed;
 
-import static tech.pegasys.pantheon.ethereum.mainnet.MainnetTransactionValidator.NO_CHAIN_ID;
-
 import tech.pegasys.pantheon.config.GenesisConfigOptions;
 import tech.pegasys.pantheon.ethereum.core.PrivacyParameters;
 import tech.pegasys.pantheon.ethereum.mainnet.ProtocolSchedule;
 import tech.pegasys.pantheon.ethereum.mainnet.ProtocolScheduleBuilder;
 
+import java.math.BigInteger;
+
 /** A ProtocolSchedule which behaves similarly to MainNet, but with a much reduced difficulty. */
 public class FixedDifficultyProtocolSchedule {
+  private static BigInteger DEFAULT_CHAIN_ID = BigInteger.valueOf(2018);
 
   public static ProtocolSchedule<Void> create(
       final GenesisConfigOptions config, final PrivacyParameters privacyParameters) {
     return new ProtocolScheduleBuilder<>(
             config,
-            NO_CHAIN_ID,
+            DEFAULT_CHAIN_ID,
             builder -> builder.difficultyCalculator(FixedDifficultyCalculators.calculator(config)),
             privacyParameters)
         .createProtocolSchedule();

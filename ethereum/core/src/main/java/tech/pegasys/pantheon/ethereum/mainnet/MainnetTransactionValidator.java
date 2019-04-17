@@ -38,8 +38,6 @@ import java.util.Optional;
  */
 public class MainnetTransactionValidator implements TransactionValidator {
 
-  public static final BigInteger NO_CHAIN_ID = BigInteger.valueOf(-1);
-
   public static MainnetTransactionValidator create() {
     return new MainnetTransactionValidator(new FrontierGasCalculator(), false);
   }
@@ -52,16 +50,23 @@ public class MainnetTransactionValidator implements TransactionValidator {
 
   public MainnetTransactionValidator(
       final GasCalculator gasCalculator, final boolean checkSignatureMalleability) {
-    this(gasCalculator, checkSignatureMalleability, NO_CHAIN_ID);
+    this(gasCalculator, checkSignatureMalleability, Optional.empty());
   }
 
   public MainnetTransactionValidator(
       final GasCalculator gasCalculator,
       final boolean checkSignatureMalleability,
       final BigInteger chainId) {
+    this(gasCalculator, checkSignatureMalleability, Optional.of(chainId));
+  }
+
+  private MainnetTransactionValidator(
+      final GasCalculator gasCalculator,
+      final boolean checkSignatureMalleability,
+      final Optional<BigInteger> chainId) {
     this.gasCalculator = gasCalculator;
     this.disallowSignatureMalleability = checkSignatureMalleability;
-    this.chainId = chainId.signum() == 1 ? Optional.of(chainId) : Optional.empty();
+    this.chainId = chainId;
   }
 
   @Override
