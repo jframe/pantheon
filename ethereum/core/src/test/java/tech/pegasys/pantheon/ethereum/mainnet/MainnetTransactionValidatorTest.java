@@ -32,6 +32,7 @@ import tech.pegasys.pantheon.ethereum.core.Wei;
 import tech.pegasys.pantheon.ethereum.vm.GasCalculator;
 
 import java.math.BigInteger;
+import java.util.Optional;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,7 +47,9 @@ public class MainnetTransactionValidatorTest {
   @Mock private GasCalculator gasCalculator;
 
   private final Transaction basicTransaction =
-      new TransactionTestFixture().chainId(BigInteger.ONE).createTransaction(senderKeys);
+      new TransactionTestFixture()
+          .chainId(Optional.of(BigInteger.ONE))
+          .createTransaction(senderKeys);
 
   @Test
   public void shouldRejectTransactionIfIntrinsicGasExceedsGasLimit() {
@@ -55,7 +58,7 @@ public class MainnetTransactionValidatorTest {
     final Transaction transaction =
         new TransactionTestFixture()
             .gasLimit(10)
-            .chainId(BigInteger.ZERO)
+            .chainId(Optional.empty())
             .createTransaction(senderKeys);
     when(gasCalculator.transactionIntrinsicGasCost(transaction)).thenReturn(Gas.of(50));
 

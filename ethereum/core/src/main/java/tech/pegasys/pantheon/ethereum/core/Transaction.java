@@ -91,12 +91,12 @@ public class Transaction {
 
     final BigInteger v = input.readBigIntegerScalar();
     final byte recId;
-    BigInteger chainId = BigInteger.valueOf(-1);
+    Optional<BigInteger> chainId = Optional.empty();
     if (v.equals(REPLAY_UNPROTECTED_V_BASE) || v.equals(REPLAY_UNPROTECTED_V_BASE_PLUS_1)) {
       recId = v.subtract(REPLAY_UNPROTECTED_V_BASE).byteValueExact();
     } else if (v.compareTo(REPLAY_PROTECTED_V_MIN) > 0) {
-      chainId = v.subtract(REPLAY_PROTECTED_V_BASE).divide(TWO);
-      recId = v.subtract(TWO.multiply(chainId).add(REPLAY_PROTECTED_V_BASE)).byteValueExact();
+      chainId = Optional.of(v.subtract(REPLAY_PROTECTED_V_BASE).divide(TWO));
+      recId = v.subtract(TWO.multiply(chainId.get()).add(REPLAY_PROTECTED_V_BASE)).byteValueExact();
     } else {
       throw new RuntimeException(
           String.format("An unsupported encoded `v` value of %s was found", v));
@@ -136,7 +136,7 @@ public class Transaction {
       final SECP256K1.Signature signature,
       final BytesValue payload,
       final Address sender,
-      final BigInteger chainId) {
+      final Optional<BigInteger> chainId) {
     this.nonce = nonce;
     this.gasPrice = gasPrice;
     this.gasLimit = gasLimit;
@@ -145,7 +145,7 @@ public class Transaction {
     this.signature = signature;
     this.payload = payload;
     this.sender = sender;
-    this.chainId = chainId.signum() == 1 ? Optional.of(chainId) : Optional.empty();
+    this.chainId = chainId;
   }
 
   /**
@@ -429,10 +429,15 @@ public class Transaction {
 
     protected Address sender;
 
-    protected BigInteger chainId = BigInteger.valueOf(-1);
+    protected Optional<BigInteger> chainId = Optional.empty();
+
+    public Builder chainId(final Optional<BigInteger> chainId) {
+      this.chainId = chainId;
+      return this;
+    }
 
     public Builder chainId(final BigInteger chainId) {
-      this.chainId = chainId;
+      this.chainId = Optional.of(chainId);
       return this;
     }
 
@@ -498,10 +503,8 @@ public class Transaction {
     }
 
     protected SECP256K1.Signature computeSignature(final SECP256K1.KeyPair keys) {
-      final Optional<BigInteger> optionalChainId =
-          chainId.signum() == 1 ? Optional.of(chainId) : Optional.empty();
       final Bytes32 hash =
-          computeSenderRecoveryHash(nonce, gasPrice, gasLimit, to, value, payload, optionalChainId);
+          computeSenderRecoveryHash(nonce, gasPrice, gasLimit, to, value, payload, chainId);
       return SECP256K1.sign(hash, keys);
     }
   }

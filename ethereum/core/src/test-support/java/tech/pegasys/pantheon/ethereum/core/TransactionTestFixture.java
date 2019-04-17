@@ -33,7 +33,7 @@ public class TransactionTestFixture {
 
   private BytesValue payload = BytesValue.EMPTY;
 
-  private BigInteger chainId = BigInteger.valueOf(2018);
+  private Optional<BigInteger> chainId = Optional.of(BigInteger.valueOf(2018));
 
   public Transaction createTransaction(final KeyPair keys) {
     final Transaction.Builder builder = Transaction.builder();
@@ -86,7 +86,7 @@ public class TransactionTestFixture {
     return this;
   }
 
-  public TransactionTestFixture chainId(final BigInteger chainId) {
+  public TransactionTestFixture chainId(final Optional<BigInteger> chainId) {
     this.chainId = chainId;
     return this;
   }
