@@ -112,7 +112,7 @@ public class PendingTransactions {
     return addTransaction;
   }
 
-  public boolean addLocalTransaction(final Transaction transaction) {
+  boolean addLocalTransaction(final Transaction transaction) {
     final boolean addTransaction =
         addTransaction(new TransactionInfo(transaction, true, clock.instant()));
     localTransactionAddedCounter.inc();
@@ -124,7 +124,7 @@ public class PendingTransactions {
     notifyTransactionDropped(transaction);
   }
 
-  public void transactionAddedToBlock(final Transaction transaction) {
+  void transactionAddedToBlock(final Transaction transaction) {
     doRemoveTransaction(transaction, true);
   }
 
@@ -248,6 +248,10 @@ public class PendingTransactions {
     transactionDroppedListeners.forEach(listener -> listener.onTransactionDropped(transaction));
   }
 
+  public long maxSize() {
+    return maxPendingTransactions;
+  }
+
   public int size() {
     synchronized (pendingTransactions) {
       return pendingTransactions.size();
@@ -267,11 +271,11 @@ public class PendingTransactions {
     }
   }
 
-  public void addTransactionListener(final PendingTransactionListener listener) {
+  void addTransactionListener(final PendingTransactionListener listener) {
     listeners.subscribe(listener);
   }
 
-  public void addTransactionDroppedListener(final PendingTransactionDroppedListener listener) {
+  void addTransactionDroppedListener(final PendingTransactionDroppedListener listener) {
     transactionDroppedListeners.subscribe(listener);
   }
 
@@ -298,7 +302,7 @@ public class PendingTransactions {
     private final Instant addedToPoolAt;
     private final long sequence; // Allows prioritization based on order transactions are added
 
-    private TransactionInfo(
+    TransactionInfo(
         final Transaction transaction,
         final boolean receivedFromLocalSource,
         final Instant addedToPoolAt) {
