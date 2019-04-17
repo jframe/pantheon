@@ -124,7 +124,7 @@ public class JsonGenesisConfigOptions implements GenesisConfigOptions {
 
   @Override
   public Optional<BigInteger> getChainId() {
-    return getOptionalBigInteger(configRoot, "chainId");
+    return getOptionalBigInteger(configRoot, "chainid");
   }
 
   @Override
