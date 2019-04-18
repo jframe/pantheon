@@ -14,35 +14,33 @@ package tech.pegasys.pantheon.ethereum.jsonrpc.internal.methods;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.math.BigInteger;
+import java.util.Optional;
+import org.junit.Before;
+import org.junit.Test;
 import tech.pegasys.pantheon.ethereum.jsonrpc.internal.JsonRpcRequest;
 import tech.pegasys.pantheon.ethereum.jsonrpc.internal.response.JsonRpcResponse;
 import tech.pegasys.pantheon.ethereum.jsonrpc.internal.response.JsonRpcSuccessResponse;
 import tech.pegasys.pantheon.ethereum.jsonrpc.internal.results.Quantity;
 
-import java.math.BigInteger;
-import java.util.Optional;
+public class NetVersionTest {
 
-import org.junit.Before;
-import org.junit.Test;
-
-public class EthChainIdTest {
-
-  private EthChainId method;
+  private NetVersion method;
   private final BigInteger CHAIN_ID = BigInteger.ONE;
 
   @Before
   public void setUp() {
-    method = new EthChainId(Optional.of(CHAIN_ID));
+    method = new NetVersion(Optional.of(CHAIN_ID));
   }
 
   @Test
   public void shouldReturnCorrectMethodName() {
-    assertThat(method.getName()).isEqualTo("eth_chainId");
+    assertThat(method.getName()).isEqualTo("net_version");
   }
 
   @Test
   public void shouldReturnChainId() {
-    JsonRpcResponse expectedResponse = new JsonRpcSuccessResponse(null, Quantity.create(CHAIN_ID));
+    JsonRpcResponse expectedResponse = new JsonRpcSuccessResponse(null, CHAIN_ID.toString());
 
     JsonRpcResponse response = method.response(request());
 
@@ -51,8 +49,8 @@ public class EthChainIdTest {
 
   @Test
   public void shouldReturnNullWhenNoChainId() {
-    method = new EthChainId(Optional.empty());
-    JsonRpcResponse expectedResponse = new JsonRpcSuccessResponse(null, null);
+    method = new NetVersion(Optional.empty());
+    JsonRpcResponse expectedResponse = new JsonRpcSuccessResponse(null, "null");
 
     JsonRpcResponse response = method.response(request());
 
@@ -60,6 +58,6 @@ public class EthChainIdTest {
   }
 
   private JsonRpcRequest request() {
-    return new JsonRpcRequest(null, "eth_chainId", null);
+    return new JsonRpcRequest(null, "net_version", null);
   }
 }
