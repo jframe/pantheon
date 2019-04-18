@@ -17,6 +17,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import java.math.BigInteger;
 import java.util.Comparator;
 import java.util.NavigableSet;
+import java.util.Optional;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -26,14 +27,14 @@ public class MutableProtocolSchedule<C> implements ProtocolSchedule<C> {
       new TreeSet<>(
           Comparator.<ScheduledProtocolSpec<C>, Long>comparing(ScheduledProtocolSpec::getBlock)
               .reversed());
-  private final BigInteger chainId;
+  private final Optional<BigInteger> chainId;
 
-  public MutableProtocolSchedule(final BigInteger chainId) {
+  public MutableProtocolSchedule(final Optional<BigInteger> chainId) {
     this.chainId = chainId;
   }
 
   @Override
-  public BigInteger getChainId() {
+  public Optional<BigInteger> getChainId() {
     return chainId;
   }
 

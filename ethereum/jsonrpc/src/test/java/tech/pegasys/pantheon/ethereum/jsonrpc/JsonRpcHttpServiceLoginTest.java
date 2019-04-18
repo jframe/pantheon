@@ -389,7 +389,7 @@ public class JsonRpcHttpServiceLoginTest {
       assertThat(token).isNotNull();
 
       JsonRpcMethod ethAccounts = new EthAccounts();
-      JsonRpcMethod netVersion = new NetVersion(BigInteger.valueOf(123));
+      JsonRpcMethod netVersion = new NetVersion(Optional.of(BigInteger.valueOf(123)));
       JsonRpcMethod ethBlockNumber = new EthBlockNumber(blockchainQueries);
       JsonRpcMethod web3Sha3 = new Web3Sha3();
       JsonRpcMethod web3ClientVersion = new Web3ClientVersion("777");

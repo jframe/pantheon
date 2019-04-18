@@ -17,6 +17,7 @@ import tech.pegasys.pantheon.ethereum.jsonrpc.internal.response.JsonRpcResponse;
 import tech.pegasys.pantheon.ethereum.jsonrpc.internal.response.JsonRpcSuccessResponse;
 
 import java.math.BigInteger;
+import java.util.Optional;
 
 /**
  * In Consensys' client, net_version maps to the network id, as specified in *
@@ -27,8 +28,8 @@ import java.math.BigInteger;
 public class NetVersion implements JsonRpcMethod {
   private final String chainId;
 
-  public NetVersion(final BigInteger chainId) {
-    this.chainId = String.valueOf(chainId);
+  public NetVersion(final Optional<BigInteger> chainId) {
+    this.chainId = String.valueOf(chainId.orElse(null));
   }
 
   @Override

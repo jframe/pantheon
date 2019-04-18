@@ -39,7 +39,7 @@ import java.util.Optional;
 public class MainnetTransactionValidator implements TransactionValidator {
 
   public static MainnetTransactionValidator create() {
-    return new MainnetTransactionValidator(new FrontierGasCalculator(), false);
+    return new MainnetTransactionValidator(new FrontierGasCalculator(), false, Optional.empty());
   }
 
   private final GasCalculator gasCalculator;
@@ -49,18 +49,6 @@ public class MainnetTransactionValidator implements TransactionValidator {
   private final Optional<BigInteger> chainId;
 
   public MainnetTransactionValidator(
-      final GasCalculator gasCalculator, final boolean checkSignatureMalleability) {
-    this(gasCalculator, checkSignatureMalleability, Optional.empty());
-  }
-
-  public MainnetTransactionValidator(
-      final GasCalculator gasCalculator,
-      final boolean checkSignatureMalleability,
-      final BigInteger chainId) {
-    this(gasCalculator, checkSignatureMalleability, Optional.of(chainId));
-  }
-
-  private MainnetTransactionValidator(
       final GasCalculator gasCalculator,
       final boolean checkSignatureMalleability,
       final Optional<BigInteger> chainId) {

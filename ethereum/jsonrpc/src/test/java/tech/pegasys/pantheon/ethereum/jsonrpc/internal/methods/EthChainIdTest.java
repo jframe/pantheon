@@ -20,6 +20,7 @@ import tech.pegasys.pantheon.ethereum.jsonrpc.internal.response.JsonRpcSuccessRe
 import tech.pegasys.pantheon.ethereum.jsonrpc.internal.results.Quantity;
 
 import java.math.BigInteger;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -31,7 +32,7 @@ public class EthChainIdTest {
 
   @Before
   public void setUp() {
-    method = new EthChainId(CHAIN_ID);
+    method = new EthChainId(Optional.of(CHAIN_ID));
   }
 
   @Test

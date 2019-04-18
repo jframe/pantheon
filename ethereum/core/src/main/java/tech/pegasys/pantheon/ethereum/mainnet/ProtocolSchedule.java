@@ -13,10 +13,11 @@
 package tech.pegasys.pantheon.ethereum.mainnet;
 
 import java.math.BigInteger;
+import java.util.Optional;
 
 public interface ProtocolSchedule<C> {
 
   ProtocolSpec<C> getByBlockNumber(long number);
 
-  BigInteger getChainId();
+  Optional<BigInteger> getChainId();
 }
