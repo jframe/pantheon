@@ -41,9 +41,9 @@ public class NetVersionTest {
 
   @Test
   public void shouldReturnChainId() {
-    JsonRpcResponse expectedResponse = new JsonRpcSuccessResponse(null, CHAIN_ID.toString());
+    final JsonRpcResponse expectedResponse = new JsonRpcSuccessResponse(null, CHAIN_ID.toString());
 
-    JsonRpcResponse response = method.response(request());
+    final JsonRpcResponse response = method.response(request());
 
     assertThat(response).isEqualToComparingFieldByField(expectedResponse);
   }
@@ -51,9 +51,9 @@ public class NetVersionTest {
   @Test
   public void shouldReturnNullWhenNoChainId() {
     method = new NetVersion(Optional.empty());
-    JsonRpcResponse expectedResponse = new JsonRpcSuccessResponse(null, "null");
+    final JsonRpcResponse expectedResponse = new JsonRpcSuccessResponse(null, "null");
 
-    JsonRpcResponse response = method.response(request());
+    final JsonRpcResponse response = method.response(request());
 
     assertThat(response).isEqualToComparingFieldByField(expectedResponse);
   }

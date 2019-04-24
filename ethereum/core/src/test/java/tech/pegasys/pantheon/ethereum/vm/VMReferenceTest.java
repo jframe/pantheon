@@ -94,7 +94,7 @@ public class VMReferenceTest extends AbstractRetryingTest {
     "CallToPrecompiledContract",
     "createNameRegistrator"
   };
-  private static final BigInteger CHAIN_ID = BigInteger.ONE;
+  private static final Optional<BigInteger> CHAIN_ID = Optional.of(BigInteger.ONE);
   private final String name;
 
   private final VMReferenceTestCaseSpec spec;
@@ -121,7 +121,7 @@ public class VMReferenceTest extends AbstractRetryingTest {
     final ProtocolSpec<Void> protocolSpec =
         MainnetProtocolSpecs.frontierDefinition(OptionalInt.empty())
             .privacyParameters(PrivacyParameters.DEFAULT)
-            .build(new MutableProtocolSchedule<>(Optional.of(CHAIN_ID)));
+            .build(new MutableProtocolSchedule<>(CHAIN_ID));
 
     final TestBlockchain blockchain = new TestBlockchain(execEnv.getBlockHeader().getNumber());
     final MessageFrame frame =

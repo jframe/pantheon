@@ -42,9 +42,9 @@ public class EthChainIdTest {
 
   @Test
   public void shouldReturnChainId() {
-    JsonRpcResponse expectedResponse = new JsonRpcSuccessResponse(null, Quantity.create(CHAIN_ID));
+    final JsonRpcResponse expectedResponse = new JsonRpcSuccessResponse(null, Quantity.create(CHAIN_ID));
 
-    JsonRpcResponse response = method.response(request());
+    final JsonRpcResponse response = method.response(request());
 
     assertThat(response).isEqualToComparingFieldByField(expectedResponse);
   }
@@ -52,9 +52,9 @@ public class EthChainIdTest {
   @Test
   public void shouldReturnNullWhenNoChainId() {
     method = new EthChainId(Optional.empty());
-    JsonRpcResponse expectedResponse = new JsonRpcSuccessResponse(null, null);
+    final JsonRpcResponse expectedResponse = new JsonRpcSuccessResponse(null, null);
 
-    JsonRpcResponse response = method.response(request());
+    final JsonRpcResponse response = method.response(request());
 
     assertThat(response).isEqualToComparingFieldByField(expectedResponse);
   }

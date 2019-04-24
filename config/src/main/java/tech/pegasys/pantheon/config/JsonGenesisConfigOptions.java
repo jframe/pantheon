@@ -137,7 +137,7 @@ public class JsonGenesisConfigOptions implements GenesisConfigOptions {
   @Override
   public Map<String, Object> asMap() {
     final ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
-    builder.put("chainId", getChainId().get());
+    getChainId().ifPresent(chainId -> builder.put("chainId", chainId));
     getHomesteadBlockNumber().ifPresent(l -> builder.put("homesteadBlock", l));
     getDaoForkBlock()
         .ifPresent(
