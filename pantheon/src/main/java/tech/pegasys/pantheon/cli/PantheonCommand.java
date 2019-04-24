@@ -80,6 +80,7 @@ import java.net.InetAddress;
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -127,11 +128,11 @@ public class PantheonCommand implements DefaultCommandValues, Runnable {
 
   private final BlockImporter blockImporter;
 
-  private final PantheonControllerBuilder controllerBuilder;
   private final SynchronizerConfiguration.Builder synchronizerConfigurationBuilder;
   private final EthereumWireProtocolConfiguration.Builder ethereumWireConfigurationBuilder;
   private final RocksDbConfiguration.Builder rocksDbConfigurationBuilder;
   private final RunnerBuilder runnerBuilder;
+  private final PantheonController.Builder controllerBuilderFactory;
 
   protected KeyLoader getKeyLoader() {
     return KeyPairUtil::loadKeyPair;
@@ -397,7 +398,7 @@ public class PantheonCommand implements DefaultCommandValues, Runnable {
       names = {"--host-whitelist"},
       paramLabel = "<hostname>[,<hostname>...]... or * or all",
       description =
-          "Comma separated list of hostnames to whitelist for JSON-RPC access, or * or all to accept any host (default: ${DEFAULT-VALUE})",
+          "Comma separated list of hostnames to whitelist for JSON-RPC access, or * to accept any host (default: ${DEFAULT-VALUE})",
       defaultValue = "localhost,127.0.0.1")
   private final JsonRPCWhitelistHostsProperty hostsWhitelist = new JsonRPCWhitelistHostsProperty();
 
@@ -521,14 +522,14 @@ public class PantheonCommand implements DefaultCommandValues, Runnable {
       final Logger logger,
       final BlockImporter blockImporter,
       final RunnerBuilder runnerBuilder,
-      final PantheonControllerBuilder controllerBuilder,
+      final PantheonController.Builder controllerBuilderFactory,
       final SynchronizerConfiguration.Builder synchronizerConfigurationBuilder,
       final EthereumWireProtocolConfiguration.Builder ethereumWireConfigurationBuilder,
       final RocksDbConfiguration.Builder rocksDbConfigurationBuilder) {
     this.logger = logger;
     this.blockImporter = blockImporter;
     this.runnerBuilder = runnerBuilder;
-    this.controllerBuilder = controllerBuilder;
+    this.controllerBuilderFactory = controllerBuilderFactory;
     this.synchronizerConfigurationBuilder = synchronizerConfigurationBuilder;
     this.ethereumWireConfigurationBuilder = ethereumWireConfigurationBuilder;
     this.rocksDbConfigurationBuilder = rocksDbConfigurationBuilder;
@@ -691,19 +692,19 @@ public class PantheonCommand implements DefaultCommandValues, Runnable {
 
   PantheonController<?> buildController() {
     try {
-      return controllerBuilder
+      return controllerBuilderFactory
+          .fromEthNetworkConfig(updateNetworkConfig(getNetwork()))
           .synchronizerConfiguration(buildSyncConfig())
           .ethereumWireProtocolConfiguration(ethereumWireConfigurationBuilder.build())
-          .rocksDbConfiguration(buildRocksDbConfiguration())
-          .homePath(dataDir())
-          .ethNetworkConfig(updateNetworkConfig(getNetwork()))
+          .rocksdDbConfiguration(buildRocksDbConfiguration())
+          .dataDirectory(dataDir())
           .miningParameters(
               new MiningParameters(coinbase, minTransactionGasPrice, extraData, isMiningEnabled))
-          .devMode(NetworkName.DEV.equals(getNetwork()))
           .maxPendingTransactions(txPoolMaxSize)
           .nodePrivateKeyFile(nodePrivateKeyFile())
           .metricsSystem(metricsSystem.get())
           .privacyParameters(privacyParameters())
+          .clock(Clock.systemUTC())
           .build();
     } catch (final InvalidConfigurationException e) {
       throw new ExecutionException(this.commandLine, e.getMessage());
