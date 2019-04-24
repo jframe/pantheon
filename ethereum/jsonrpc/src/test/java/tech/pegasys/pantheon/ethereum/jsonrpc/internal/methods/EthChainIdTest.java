@@ -42,7 +42,8 @@ public class EthChainIdTest {
 
   @Test
   public void shouldReturnChainId() {
-    final JsonRpcResponse expectedResponse = new JsonRpcSuccessResponse(null, Quantity.create(CHAIN_ID));
+    final JsonRpcResponse expectedResponse =
+        new JsonRpcSuccessResponse(null, Quantity.create(CHAIN_ID));
 
     final JsonRpcResponse response = method.response(request());
 
