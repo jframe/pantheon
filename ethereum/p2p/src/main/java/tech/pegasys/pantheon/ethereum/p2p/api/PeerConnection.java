@@ -12,6 +12,7 @@
  */
 package tech.pegasys.pantheon.ethereum.p2p.api;
 
+import tech.pegasys.pantheon.ethereum.p2p.peers.Peer;
 import tech.pegasys.pantheon.ethereum.p2p.wire.Capability;
 import tech.pegasys.pantheon.ethereum.p2p.wire.PeerInfo;
 import tech.pegasys.pantheon.ethereum.p2p.wire.messages.DisconnectMessage.DisconnectReason;
@@ -19,7 +20,6 @@ import tech.pegasys.pantheon.util.enode.EnodeURL;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.util.Set;
 
 /** A P2P connection to another node. */
@@ -65,12 +65,15 @@ public interface PeerConnection {
     send(capability(protocol), message);
   }
 
+  /** @return A representation of the remote peer this node is connected to. */
+  Peer getPeer();
+
   /**
    * Returns the Peer's Description.
    *
    * @return Peer Description
    */
-  PeerInfo getPeer();
+  PeerInfo getPeerInfo();
 
   /**
    * Immediately terminate the connection without sending a disconnect message.
@@ -90,9 +93,9 @@ public interface PeerConnection {
   /** @return True if the peer is disconnected */
   boolean isDisconnected();
 
-  SocketAddress getLocalAddress();
+  InetSocketAddress getLocalAddress();
 
-  SocketAddress getRemoteAddress();
+  InetSocketAddress getRemoteAddress();
 
   class PeerNotConnected extends IOException {
 
@@ -101,11 +104,7 @@ public interface PeerConnection {
     }
   }
 
-  default boolean isRemoteEnode(final EnodeURL remoteEnodeUrl) {
-    return ((remoteEnodeUrl.getNodeId().equals(this.getPeer().getAddress()))
-        && (remoteEnodeUrl.getListeningPort() == this.getPeer().getPort())
-        && (remoteEnodeUrl
-            .getInetAddress()
-            .equals(((InetSocketAddress) this.getRemoteAddress()).getAddress())));
+  default EnodeURL getRemoteEnode() {
+    return getPeer().getEnodeURL();
   }
 }

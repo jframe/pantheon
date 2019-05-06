@@ -13,10 +13,9 @@
 package tech.pegasys.pantheon.ethereum.eth.transactions;
 
 import tech.pegasys.pantheon.ethereum.ProtocolContext;
-import tech.pegasys.pantheon.ethereum.core.PendingTransactions;
-import tech.pegasys.pantheon.ethereum.core.TransactionPool;
 import tech.pegasys.pantheon.ethereum.eth.manager.EthContext;
 import tech.pegasys.pantheon.ethereum.eth.messages.EthPV62;
+import tech.pegasys.pantheon.ethereum.eth.sync.state.SyncState;
 import tech.pegasys.pantheon.ethereum.mainnet.ProtocolSchedule;
 import tech.pegasys.pantheon.metrics.MetricsSystem;
 
@@ -30,9 +29,13 @@ public class TransactionPoolFactory {
       final EthContext ethContext,
       final Clock clock,
       final int maxPendingTransactions,
-      final MetricsSystem metricsSystem) {
+      final MetricsSystem metricsSystem,
+      final SyncState syncState,
+      final int maxTransactionRetentionHours) {
+
     final PendingTransactions pendingTransactions =
-        new PendingTransactions(maxPendingTransactions, clock, metricsSystem);
+        new PendingTransactions(
+            maxTransactionRetentionHours, maxPendingTransactions, clock, metricsSystem);
 
     final PeerTransactionTracker transactionTracker = new PeerTransactionTracker();
     final TransactionsMessageSender transactionsMessageSender =
@@ -43,7 +46,10 @@ public class TransactionPoolFactory {
             pendingTransactions,
             protocolSchedule,
             protocolContext,
-            new TransactionSender(transactionTracker, transactionsMessageSender, ethContext));
+            new TransactionSender(transactionTracker, transactionsMessageSender, ethContext),
+            syncState,
+            ethContext,
+            transactionTracker);
 
     final TransactionsMessageHandler transactionsMessageHandler =
         new TransactionsMessageHandler(

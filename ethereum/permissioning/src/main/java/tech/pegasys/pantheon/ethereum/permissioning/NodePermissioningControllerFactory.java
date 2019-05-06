@@ -17,6 +17,7 @@ import tech.pegasys.pantheon.ethereum.permissioning.node.NodePermissioningContro
 import tech.pegasys.pantheon.ethereum.permissioning.node.NodePermissioningProvider;
 import tech.pegasys.pantheon.ethereum.permissioning.node.provider.SyncStatusNodePermissioningProvider;
 import tech.pegasys.pantheon.ethereum.transaction.TransactionSimulator;
+import tech.pegasys.pantheon.util.bytes.BytesValue;
 import tech.pegasys.pantheon.util.enode.EnodeURL;
 
 import java.util.ArrayList;
@@ -29,8 +30,8 @@ public class NodePermissioningControllerFactory {
   public NodePermissioningController create(
       final PermissioningConfiguration permissioningConfiguration,
       final Synchronizer synchronizer,
-      final Collection<EnodeURL> bootnodes,
-      final EnodeURL selfEnode,
+      final Collection<EnodeURL> fixedNodes,
+      final BytesValue localNodeId,
       final TransactionSimulator transactionSimulator) {
 
     Optional<SyncStatusNodePermissioningProvider> syncStatusProviderOptional;
@@ -42,7 +43,7 @@ public class NodePermissioningControllerFactory {
       if (localPermissioningConfiguration.isNodeWhitelistEnabled()) {
         NodeLocalConfigPermissioningController localProvider =
             new NodeLocalConfigPermissioningController(
-                localPermissioningConfiguration, new ArrayList<>(bootnodes), selfEnode);
+                localPermissioningConfiguration, new ArrayList<>(fixedNodes), localNodeId);
         providers.add(localProvider);
       }
     }
@@ -59,7 +60,7 @@ public class NodePermissioningControllerFactory {
       }
 
       final SyncStatusNodePermissioningProvider syncStatusProvider =
-          new SyncStatusNodePermissioningProvider(synchronizer, bootnodes);
+          new SyncStatusNodePermissioningProvider(synchronizer, fixedNodes);
       syncStatusProviderOptional = Optional.of(syncStatusProvider);
     } else {
       syncStatusProviderOptional = Optional.empty();

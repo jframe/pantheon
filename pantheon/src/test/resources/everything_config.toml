@@ -33,7 +33,6 @@ network="MAINNET"
 genesis-file="~/genesis.json"
 sync-mode="fast"
 fast-sync-min-peers=5
-fast-sync-max-wait-time=30
 network-id=303
 
 # JSON-RPC
@@ -85,5 +84,8 @@ privacy-url="http://127.0.0.1:8888"
 privacy-public-key-file="./pubKey.pub"
 privacy-enabled=false
 privacy-precompiled-address=9
+
+# Transaction Pool
+tx-pool-retention-hours=999
 
 tx-pool-max-size=1234

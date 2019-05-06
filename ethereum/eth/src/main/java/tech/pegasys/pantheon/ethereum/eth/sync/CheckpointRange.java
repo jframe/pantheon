@@ -15,26 +15,49 @@ package tech.pegasys.pantheon.ethereum.eth.sync;
 import static java.lang.Math.toIntExact;
 
 import tech.pegasys.pantheon.ethereum.core.BlockHeader;
+import tech.pegasys.pantheon.ethereum.eth.manager.EthPeer;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import com.google.common.base.MoreObjects;
 
 public class CheckpointRange {
-  private final BlockHeader start;
-  private final BlockHeader end;
 
-  public CheckpointRange(final BlockHeader start, final BlockHeader end) {
+  private final EthPeer syncTarget;
+  private final BlockHeader start;
+  private final Optional<BlockHeader> end;
+
+  public CheckpointRange(final EthPeer syncTarget, final BlockHeader start) {
+    this.syncTarget = syncTarget;
     this.start = start;
-    this.end = end;
+    this.end = Optional.empty();
+  }
+
+  public CheckpointRange(final EthPeer syncTarget, final BlockHeader start, final BlockHeader end) {
+    this.syncTarget = syncTarget;
+    this.start = start;
+    this.end = Optional.of(end);
+  }
+
+  public EthPeer getSyncTarget() {
+    return syncTarget;
   }
 
   public BlockHeader getStart() {
     return start;
   }
 
+  public boolean hasEnd() {
+    return end.isPresent();
+  }
+
   public BlockHeader getEnd() {
-    return end;
+    return end.get();
+  }
+
+  public int getSegmentLengthExclusive() {
+    return toIntExact(end.get().getNumber() - start.getNumber() - 1);
   }
 
   @Override
@@ -46,23 +69,22 @@ public class CheckpointRange {
       return false;
     }
     final CheckpointRange that = (CheckpointRange) o;
-    return Objects.equals(start, that.start) && Objects.equals(end, that.end);
+    return Objects.equals(syncTarget, that.syncTarget)
+        && Objects.equals(start, that.start)
+        && Objects.equals(end, that.end);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(start, end);
+    return Objects.hash(syncTarget, start, end);
   }
 
   @Override
   public String toString() {
     return MoreObjects.toStringHelper(this)
-        .add("start", start.getNumber())
-        .add("end", end.getNumber())
+        .add("syncTarget", syncTarget)
+        .add("start", start)
+        .add("end", end)
         .toString();
-  }
-
-  public int getSegmentLength() {
-    return toIntExact(end.getNumber() - start.getNumber());
   }
 }

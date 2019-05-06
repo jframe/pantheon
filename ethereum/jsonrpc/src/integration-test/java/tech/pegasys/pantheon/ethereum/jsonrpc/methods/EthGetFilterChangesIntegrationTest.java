@@ -16,6 +16,8 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import tech.pegasys.pantheon.crypto.SECP256K1.KeyPair;
 import tech.pegasys.pantheon.ethereum.ProtocolContext;
@@ -26,12 +28,16 @@ import tech.pegasys.pantheon.ethereum.core.BlockBody;
 import tech.pegasys.pantheon.ethereum.core.BlockHeader;
 import tech.pegasys.pantheon.ethereum.core.BlockHeaderTestFixture;
 import tech.pegasys.pantheon.ethereum.core.ExecutionContextTestFixture;
-import tech.pegasys.pantheon.ethereum.core.PendingTransactions;
 import tech.pegasys.pantheon.ethereum.core.Transaction;
-import tech.pegasys.pantheon.ethereum.core.TransactionPool;
-import tech.pegasys.pantheon.ethereum.core.TransactionPool.TransactionBatchAddedListener;
 import tech.pegasys.pantheon.ethereum.core.TransactionReceipt;
 import tech.pegasys.pantheon.ethereum.core.Wei;
+import tech.pegasys.pantheon.ethereum.eth.manager.EthContext;
+import tech.pegasys.pantheon.ethereum.eth.manager.EthPeers;
+import tech.pegasys.pantheon.ethereum.eth.sync.state.SyncState;
+import tech.pegasys.pantheon.ethereum.eth.transactions.PeerTransactionTracker;
+import tech.pegasys.pantheon.ethereum.eth.transactions.PendingTransactions;
+import tech.pegasys.pantheon.ethereum.eth.transactions.TransactionPool;
+import tech.pegasys.pantheon.ethereum.eth.transactions.TransactionPool.TransactionBatchAddedListener;
 import tech.pegasys.pantheon.ethereum.jsonrpc.internal.JsonRpcRequest;
 import tech.pegasys.pantheon.ethereum.jsonrpc.internal.filter.FilterIdGenerator;
 import tech.pegasys.pantheon.ethereum.jsonrpc.internal.filter.FilterManager;
@@ -49,6 +55,7 @@ import tech.pegasys.pantheon.testutil.TestClock;
 import tech.pegasys.pantheon.util.bytes.BytesValue;
 import tech.pegasys.pantheon.util.uint.UInt256;
 
+import java.math.BigInteger;
 import java.util.List;
 
 import org.assertj.core.util.Lists;
@@ -69,25 +76,40 @@ public class EthGetFilterChangesIntegrationTest {
   private final MetricsSystem metricsSystem = new NoOpMetricsSystem();
 
   private final PendingTransactions transactions =
-      new PendingTransactions(MAX_TRANSACTIONS, TestClock.fixed(), metricsSystem);
+      new PendingTransactions(
+          PendingTransactions.DEFAULT_TX_RETENTION_HOURS,
+          MAX_TRANSACTIONS,
+          TestClock.fixed(),
+          metricsSystem);
+
   private static final int MAX_TRANSACTIONS = 5;
   private static final KeyPair keyPair = KeyPair.generate();
   private final Transaction transaction = createTransaction(1);
   private final JsonRpcParameter parameters = new JsonRpcParameter();
   private FilterManager filterManager;
   private EthGetFilterChanges method;
+  private final SyncState syncState = mock(SyncState.class);
 
   @Before
   public void setUp() {
     final ExecutionContextTestFixture executionContext = ExecutionContextTestFixture.create();
     blockchain = executionContext.getBlockchain();
     final ProtocolContext<Void> protocolContext = executionContext.getProtocolContext();
+
+    PeerTransactionTracker peerTransactionTracker = mock(PeerTransactionTracker.class);
+    EthContext ethContext = mock(EthContext.class);
+    EthPeers ethPeers = mock(EthPeers.class);
+    when(ethContext.getEthPeers()).thenReturn(ethPeers);
+
     transactionPool =
         new TransactionPool(
             transactions,
             executionContext.getProtocolSchedule(),
             protocolContext,
-            batchAddedListener);
+            batchAddedListener,
+            syncState,
+            ethContext,
+            peerTransactionTracker);
     final BlockchainQueries blockchainQueries =
         new BlockchainQueries(blockchain, protocolContext.getWorldStateArchive());
     filterManager =
@@ -266,7 +288,7 @@ public class EthGetFilterChangesIntegrationTest {
         .to(Address.ID)
         .value(Wei.of(transactionNumber))
         .sender(Address.ID)
-        .chainId(1)
+        .chainId(BigInteger.ONE)
         .signAndBuild(keyPair);
   }
 

@@ -16,9 +16,9 @@ import tech.pegasys.pantheon.ethereum.p2p.api.DisconnectCallback;
 import tech.pegasys.pantheon.ethereum.p2p.api.Message;
 import tech.pegasys.pantheon.ethereum.p2p.api.P2PNetwork;
 import tech.pegasys.pantheon.ethereum.p2p.api.PeerConnection;
+import tech.pegasys.pantheon.ethereum.p2p.discovery.DiscoveryPeer;
 import tech.pegasys.pantheon.ethereum.p2p.peers.Peer;
 import tech.pegasys.pantheon.ethereum.p2p.wire.Capability;
-import tech.pegasys.pantheon.ethereum.p2p.wire.PeerInfo;
 import tech.pegasys.pantheon.util.enode.EnodeURL;
 
 import java.io.IOException;
@@ -26,11 +26,17 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 public class NoopP2PNetwork implements P2PNetwork {
   @Override
   public Collection<PeerConnection> getPeers() {
     throw new P2pDisabledException("P2P networking disabled.  Peers list unavailable.");
+  }
+
+  @Override
+  public Stream<DiscoveryPeer> getDiscoveredPeers() {
+    return Stream.empty();
   }
 
   @Override
@@ -64,16 +70,6 @@ public class NoopP2PNetwork implements P2PNetwork {
   public void awaitStop() {}
 
   @Override
-  public Optional<? extends Peer> getAdvertisedPeer() {
-    return Optional.empty();
-  }
-
-  @Override
-  public PeerInfo getLocalPeerInfo() {
-    throw new P2pDisabledException("P2P networking disabled.  Local peer info unavailable.");
-  }
-
-  @Override
   public boolean isListening() {
     return false;
   }
@@ -84,7 +80,12 @@ public class NoopP2PNetwork implements P2PNetwork {
   }
 
   @Override
-  public Optional<EnodeURL> getSelfEnodeURL() {
+  public boolean isDiscoveryEnabled() {
+    return false;
+  }
+
+  @Override
+  public Optional<EnodeURL> getLocalEnode() {
     return Optional.empty();
   }
 

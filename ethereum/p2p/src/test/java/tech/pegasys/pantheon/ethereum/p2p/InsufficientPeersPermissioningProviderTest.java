@@ -13,9 +13,6 @@
 package tech.pegasys.pantheon.ethereum.p2p;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.AdditionalMatchers.not;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -29,8 +26,10 @@ import tech.pegasys.pantheon.util.enode.EnodeURL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.function.Consumer;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -56,6 +55,11 @@ public class InsufficientPeersPermissioningProviderTest {
       EnodeURL.fromString(
           "enode://00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000005@192.168.0.5:30303");
 
+  @Before
+  public void setup() {
+    when(p2pNetwork.getLocalEnode()).thenReturn(Optional.of(SELF_ENODE));
+  }
+
   @Test
   public void noResultWhenNoBootnodes() {
     final Collection<EnodeURL> bootnodes = Collections.emptyList();
@@ -63,7 +67,7 @@ public class InsufficientPeersPermissioningProviderTest {
     when(p2pNetwork.getPeers()).thenReturn(Collections.emptyList());
 
     final InsufficientPeersPermissioningProvider provider =
-        new InsufficientPeersPermissioningProvider(p2pNetwork, SELF_ENODE, bootnodes);
+        new InsufficientPeersPermissioningProvider(p2pNetwork, bootnodes);
 
     assertThat(provider.isPermitted(SELF_ENODE, ENODE_2)).isEmpty();
   }
@@ -71,13 +75,13 @@ public class InsufficientPeersPermissioningProviderTest {
   @Test
   public void noResultWhenOtherConnections() {
     final PeerConnection neverMatchPeerConnection = mock(PeerConnection.class);
-    when(neverMatchPeerConnection.isRemoteEnode(any())).thenReturn(false);
+    when(neverMatchPeerConnection.getRemoteEnode()).thenReturn(ENODE_5);
     when(p2pNetwork.getPeers()).thenReturn(Collections.singletonList(neverMatchPeerConnection));
 
     final Collection<EnodeURL> bootnodes = Collections.singletonList(ENODE_2);
 
     final InsufficientPeersPermissioningProvider provider =
-        new InsufficientPeersPermissioningProvider(p2pNetwork, SELF_ENODE, bootnodes);
+        new InsufficientPeersPermissioningProvider(p2pNetwork, bootnodes);
 
     assertThat(provider.isPermitted(SELF_ENODE, ENODE_3)).isEmpty();
     assertThat(provider.isPermitted(SELF_ENODE, ENODE_2)).isEmpty();
@@ -90,9 +94,23 @@ public class InsufficientPeersPermissioningProviderTest {
     when(p2pNetwork.getPeers()).thenReturn(Collections.emptyList());
 
     final InsufficientPeersPermissioningProvider provider =
-        new InsufficientPeersPermissioningProvider(p2pNetwork, SELF_ENODE, bootnodes);
+        new InsufficientPeersPermissioningProvider(p2pNetwork, bootnodes);
 
     assertThat(provider.isPermitted(SELF_ENODE, ENODE_2)).contains(true);
+    assertThat(provider.isPermitted(SELF_ENODE, ENODE_3)).isEmpty();
+  }
+
+  @Test
+  public void noResultWhenLocalNodeNotReady() {
+    final Collection<EnodeURL> bootnodes = Collections.singletonList(ENODE_2);
+
+    when(p2pNetwork.getPeers()).thenReturn(Collections.emptyList());
+    when(p2pNetwork.getLocalEnode()).thenReturn(Optional.empty());
+
+    final InsufficientPeersPermissioningProvider provider =
+        new InsufficientPeersPermissioningProvider(p2pNetwork, bootnodes);
+
+    assertThat(provider.isPermitted(SELF_ENODE, ENODE_2)).isEmpty();
     assertThat(provider.isPermitted(SELF_ENODE, ENODE_3)).isEmpty();
   }
 
@@ -101,11 +119,11 @@ public class InsufficientPeersPermissioningProviderTest {
     final Collection<EnodeURL> bootnodes = Collections.singletonList(ENODE_2);
 
     final PeerConnection bootnodeMatchPeerConnection = mock(PeerConnection.class);
-    when(bootnodeMatchPeerConnection.isRemoteEnode(ENODE_2)).thenReturn(true);
+    when(bootnodeMatchPeerConnection.getRemoteEnode()).thenReturn(ENODE_2);
     when(p2pNetwork.getPeers()).thenReturn(Collections.singletonList(bootnodeMatchPeerConnection));
 
     final InsufficientPeersPermissioningProvider provider =
-        new InsufficientPeersPermissioningProvider(p2pNetwork, SELF_ENODE, bootnodes);
+        new InsufficientPeersPermissioningProvider(p2pNetwork, bootnodes);
 
     assertThat(provider.isPermitted(SELF_ENODE, ENODE_2)).contains(true);
     assertThat(provider.isPermitted(SELF_ENODE, ENODE_3)).isEmpty();
@@ -113,8 +131,7 @@ public class InsufficientPeersPermissioningProviderTest {
 
   private PeerConnection peerConnectionMatching(final EnodeURL enode) {
     final PeerConnection pc = mock(PeerConnection.class);
-    when(pc.isRemoteEnode(enode)).thenReturn(true);
-    when(pc.isRemoteEnode(not(eq(enode)))).thenReturn(false);
+    when(pc.getRemoteEnode()).thenReturn(enode);
     return pc;
   }
 
@@ -129,7 +146,7 @@ public class InsufficientPeersPermissioningProviderTest {
     when(p2pNetwork.getPeers()).thenReturn(pcs);
 
     final InsufficientPeersPermissioningProvider provider =
-        new InsufficientPeersPermissioningProvider(p2pNetwork, SELF_ENODE, bootnodes);
+        new InsufficientPeersPermissioningProvider(p2pNetwork, bootnodes);
 
     final ArgumentCaptor<DisconnectCallback> callbackCaptor =
         ArgumentCaptor.forClass(DisconnectCallback.class);
@@ -156,7 +173,7 @@ public class InsufficientPeersPermissioningProviderTest {
     when(p2pNetwork.getPeers()).thenReturn(pcs);
 
     final InsufficientPeersPermissioningProvider provider =
-        new InsufficientPeersPermissioningProvider(p2pNetwork, SELF_ENODE, bootnodes);
+        new InsufficientPeersPermissioningProvider(p2pNetwork, bootnodes);
 
     @SuppressWarnings("unchecked")
     final ArgumentCaptor<Consumer<PeerConnection>> callbackCaptor =
@@ -189,7 +206,7 @@ public class InsufficientPeersPermissioningProviderTest {
     when(p2pNetwork.getPeers()).thenReturn(pcs);
 
     final InsufficientPeersPermissioningProvider provider =
-        new InsufficientPeersPermissioningProvider(p2pNetwork, SELF_ENODE, bootnodes);
+        new InsufficientPeersPermissioningProvider(p2pNetwork, bootnodes);
 
     @SuppressWarnings("unchecked")
     final ArgumentCaptor<Consumer<PeerConnection>> connectCallbackCaptor =

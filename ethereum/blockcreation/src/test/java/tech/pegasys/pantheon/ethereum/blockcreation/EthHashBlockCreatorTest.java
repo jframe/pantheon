@@ -16,9 +16,9 @@ import tech.pegasys.pantheon.config.GenesisConfigFile;
 import tech.pegasys.pantheon.ethereum.core.Address;
 import tech.pegasys.pantheon.ethereum.core.Block;
 import tech.pegasys.pantheon.ethereum.core.ExecutionContextTestFixture;
-import tech.pegasys.pantheon.ethereum.core.PendingTransactions;
 import tech.pegasys.pantheon.ethereum.core.PrivacyParameters;
 import tech.pegasys.pantheon.ethereum.core.Wei;
+import tech.pegasys.pantheon.ethereum.eth.transactions.PendingTransactions;
 import tech.pegasys.pantheon.ethereum.mainnet.EthHashSolver;
 import tech.pegasys.pantheon.ethereum.mainnet.EthHasher.Light;
 import tech.pegasys.pantheon.ethereum.mainnet.ProtocolScheduleBuilder;
@@ -29,6 +29,7 @@ import tech.pegasys.pantheon.testutil.TestClock;
 import tech.pegasys.pantheon.util.bytes.BytesValue;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.function.Function;
 
 import com.google.common.collect.Lists;
@@ -53,7 +54,7 @@ public class EthHashBlockCreatorTest {
           .protocolSchedule(
               new ProtocolScheduleBuilder<>(
                       GenesisConfigFile.DEFAULT.getConfigOptions(),
-                      42,
+                      BigInteger.valueOf(42),
                       Function.identity(),
                       PrivacyParameters.DEFAULT)
                   .createProtocolSchedule())
@@ -62,11 +63,16 @@ public class EthHashBlockCreatorTest {
   @Test
   public void createMainnetBlock1() throws IOException {
     final EthHashSolver solver = new EthHashSolver(Lists.newArrayList(BLOCK_1_NONCE), new Light());
+
+    final PendingTransactions pendingTransactions =
+        new PendingTransactions(
+            PendingTransactions.DEFAULT_TX_RETENTION_HOURS, 1, TestClock.fixed(), metricsSystem);
+
     final EthHashBlockCreator blockCreator =
         new EthHashBlockCreator(
             BLOCK_1_COINBASE,
             parent -> BLOCK_1_EXTRA_DATA,
-            new PendingTransactions(1, TestClock.fixed(), metricsSystem),
+            pendingTransactions,
             executionContextTestFixture.getProtocolContext(),
             executionContextTestFixture.getProtocolSchedule(),
             gasLimit -> gasLimit,

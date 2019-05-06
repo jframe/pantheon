@@ -79,12 +79,12 @@ public class PeerBlacklist implements DisconnectCallback {
     this(DEFAULT_BLACKLIST_CAP, Collections.emptySet());
   }
 
-  private boolean contains(final BytesValue nodeId) {
+  public boolean contains(final BytesValue nodeId) {
     return blacklistedNodeIds.contains(nodeId) || bannedNodeIds.contains(nodeId);
   }
 
   public boolean contains(final PeerConnection peer) {
-    return contains(peer.getPeer().getNodeId());
+    return contains(peer.getPeerInfo().getNodeId());
   }
 
   public boolean contains(final Peer peer) {
@@ -105,7 +105,7 @@ public class PeerBlacklist implements DisconnectCallback {
       final DisconnectReason reason,
       final boolean initiatedByPeer) {
     if (shouldBlacklistForDisconnect(reason, initiatedByPeer)) {
-      add(connection.getPeer().getNodeId());
+      add(connection.getPeerInfo().getNodeId());
     }
   }
 

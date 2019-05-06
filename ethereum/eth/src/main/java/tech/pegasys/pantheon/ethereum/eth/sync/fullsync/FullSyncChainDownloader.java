@@ -15,15 +15,13 @@ package tech.pegasys.pantheon.ethereum.eth.sync.fullsync;
 import tech.pegasys.pantheon.ethereum.ProtocolContext;
 import tech.pegasys.pantheon.ethereum.eth.manager.EthContext;
 import tech.pegasys.pantheon.ethereum.eth.sync.ChainDownloader;
-import tech.pegasys.pantheon.ethereum.eth.sync.CheckpointHeaderManager;
-import tech.pegasys.pantheon.ethereum.eth.sync.EthTaskChainDownloader;
+import tech.pegasys.pantheon.ethereum.eth.sync.PipelineChainDownloader;
 import tech.pegasys.pantheon.ethereum.eth.sync.SynchronizerConfiguration;
 import tech.pegasys.pantheon.ethereum.eth.sync.state.SyncState;
 import tech.pegasys.pantheon.ethereum.mainnet.ProtocolSchedule;
 import tech.pegasys.pantheon.metrics.MetricsSystem;
 
 public class FullSyncChainDownloader {
-
   private FullSyncChainDownloader() {}
 
   public static <C> ChainDownloader create(
@@ -33,16 +31,17 @@ public class FullSyncChainDownloader {
       final EthContext ethContext,
       final SyncState syncState,
       final MetricsSystem metricsSystem) {
-    return new EthTaskChainDownloader<>(
-        config,
-        ethContext,
-        syncState,
+
+    final FullSyncTargetManager<C> syncTargetManager =
         new FullSyncTargetManager<>(
+            config, protocolSchedule, protocolContext, ethContext, metricsSystem);
+
+    return new PipelineChainDownloader<>(
+        syncState,
+        syncTargetManager,
+        new FullSyncDownloadPipelineFactory<>(
             config, protocolSchedule, protocolContext, ethContext, metricsSystem),
-        new CheckpointHeaderManager<>(
-            config, protocolContext, ethContext, syncState, protocolSchedule, metricsSystem),
-        new FullSyncBlockImportTaskFactory<>(
-            config, protocolSchedule, protocolContext, ethContext, metricsSystem),
+        ethContext.getScheduler(),
         metricsSystem);
   }
 }

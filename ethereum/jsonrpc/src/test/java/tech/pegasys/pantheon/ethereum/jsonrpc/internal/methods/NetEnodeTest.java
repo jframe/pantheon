@@ -43,7 +43,15 @@ public class NetEnodeTest {
       BytesValue.fromHexString(
           "0x0f1b319e32017c3fcb221841f0f978701b4e9513fe6a567a2db43d43381a9c7e3dfe7cae13cbc2f56943400bacaf9082576ab087cd51983b17d729ae796f6807");
 
-  private final DefaultPeer defaultPeer = new DefaultPeer(nodeId, "1.2.3.4", 7890, 30303);
+  private final DefaultPeer defaultPeer =
+      DefaultPeer.fromEnodeURL(
+          EnodeURL.builder()
+              .nodeId(nodeId)
+              .ipAddress("1.2.3.4")
+              .discoveryPort(7890)
+              .listeningPort(30303)
+              .build());
+
   private final Optional<EnodeURL> enodeURL = Optional.of(defaultPeer.getEnodeURL());
 
   @Mock private P2PNetwork p2PNetwork;
@@ -61,7 +69,7 @@ public class NetEnodeTest {
   @Test
   public void shouldReturnEnode() {
     when(p2PNetwork.isP2pEnabled()).thenReturn(true);
-    doReturn(enodeURL).when(p2PNetwork).getSelfEnodeURL();
+    doReturn(enodeURL).when(p2PNetwork).getLocalEnode();
 
     final JsonRpcRequest request = netEnodeRequest();
     final JsonRpcResponse expectedResponse =
@@ -84,11 +92,11 @@ public class NetEnodeTest {
   @Test
   public void shouldReturnErrorWhenP2PEnabledButNoEnodeFound() {
     when(p2PNetwork.isP2pEnabled()).thenReturn(true);
-    doReturn(Optional.empty()).when(p2PNetwork).getSelfEnodeURL();
+    doReturn(Optional.empty()).when(p2PNetwork).getLocalEnode();
 
     final JsonRpcRequest request = netEnodeRequest();
     final JsonRpcResponse expectedResponse =
-        new JsonRpcErrorResponse(request.getId(), JsonRpcError.ENODE_NOT_AVAILABLE);
+        new JsonRpcErrorResponse(request.getId(), JsonRpcError.P2P_NETWORK_NOT_RUNNING);
 
     assertThat(method.response(request)).isEqualToComparingFieldByField(expectedResponse);
   }

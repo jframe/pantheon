@@ -31,7 +31,7 @@ import tech.pegasys.pantheon.ethereum.p2p.discovery.internal.PeerTable;
 import tech.pegasys.pantheon.ethereum.p2p.discovery.internal.PingPacketData;
 import tech.pegasys.pantheon.ethereum.p2p.discovery.internal.TimerUtil;
 import tech.pegasys.pantheon.ethereum.p2p.peers.DefaultPeerId;
-import tech.pegasys.pantheon.ethereum.p2p.peers.Endpoint;
+import tech.pegasys.pantheon.ethereum.p2p.peers.Peer;
 import tech.pegasys.pantheon.ethereum.p2p.peers.PeerBlacklist;
 import tech.pegasys.pantheon.ethereum.p2p.wire.messages.DisconnectMessage;
 import tech.pegasys.pantheon.ethereum.permissioning.NodeLocalConfigPermissioningController;
@@ -40,6 +40,7 @@ import tech.pegasys.pantheon.metrics.MetricsSystem;
 import tech.pegasys.pantheon.util.NetworkUtility;
 import tech.pegasys.pantheon.util.Subscribers;
 import tech.pegasys.pantheon.util.bytes.BytesValue;
+import tech.pegasys.pantheon.util.enode.EnodeURL;
 
 import java.net.InetSocketAddress;
 import java.net.SocketException;
@@ -47,6 +48,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -70,7 +72,7 @@ public abstract class PeerDiscoveryAgent implements DisconnectCallback {
   private static final long PEER_REFRESH_INTERVAL_MS = MILLISECONDS.convert(30, TimeUnit.MINUTES);
 
   protected final List<DiscoveryPeer> bootstrapPeers;
-  private final PeerRequirement peerRequirement;
+  private final List<PeerRequirement> peerRequirements = new CopyOnWriteArrayList<>();
   private final PeerBlacklist peerBlacklist;
   private final Optional<NodeLocalConfigPermissioningController> nodeWhitelistController;
   private final Optional<NodePermissioningController> nodePermissioningController;
@@ -95,7 +97,6 @@ public abstract class PeerDiscoveryAgent implements DisconnectCallback {
   public PeerDiscoveryAgent(
       final SECP256K1.KeyPair keyPair,
       final DiscoveryConfiguration config,
-      final PeerRequirement peerRequirement,
       final PeerBlacklist peerBlacklist,
       final Optional<NodeLocalConfigPermissioningController> nodeWhitelistController,
       final Optional<NodePermissioningController> nodePermissioningController,
@@ -106,12 +107,14 @@ public abstract class PeerDiscoveryAgent implements DisconnectCallback {
 
     validateConfiguration(config);
 
-    this.peerRequirement = peerRequirement;
     this.peerBlacklist = peerBlacklist;
     this.nodeWhitelistController = nodeWhitelistController;
     this.nodePermissioningController = nodePermissioningController;
     this.bootstrapPeers =
-        config.getBootstrapPeers().stream().map(DiscoveryPeer::new).collect(Collectors.toList());
+        config.getBootstrapPeers().stream()
+            .map(Peer::getEnodeURL)
+            .map(DiscoveryPeer::fromEnode)
+            .collect(Collectors.toList());
 
     this.config = config;
     this.keyPair = keyPair;
@@ -142,8 +145,13 @@ public abstract class PeerDiscoveryAgent implements DisconnectCallback {
               (InetSocketAddress localAddress) -> {
                 // Once listener is set up, finish initializing
                 advertisedPeer =
-                    new DiscoveryPeer(
-                        id, config.getAdvertisedHost(), localAddress.getPort(), tcpPort);
+                    DiscoveryPeer.fromEnode(
+                        EnodeURL.builder()
+                            .nodeId(id)
+                            .ipAddress(config.getAdvertisedHost())
+                            .listeningPort(tcpPort)
+                            .discoveryPort(localAddress.getPort())
+                            .build());
                 isActive = true;
                 startController();
               });
@@ -151,6 +159,10 @@ public abstract class PeerDiscoveryAgent implements DisconnectCallback {
       this.isActive = false;
       return CompletableFuture.completedFuture(null);
     }
+  }
+
+  public void addPeerRequirement(final PeerRequirement peerRequirement) {
+    this.peerRequirements.add(peerRequirement);
   }
 
   private void startController() {
@@ -169,7 +181,7 @@ public abstract class PeerDiscoveryAgent implements DisconnectCallback {
         createTimer(),
         createWorkerExecutor(),
         PEER_REFRESH_INTERVAL_MS,
-        peerRequirement,
+        PeerRequirement.combine(peerRequirements),
         peerBlacklist,
         nodeWhitelistController,
         nodePermissioningController,
@@ -194,7 +206,15 @@ public abstract class PeerDiscoveryAgent implements DisconnectCallback {
     // Notify the peer controller.
     String host = sourceEndpoint.getHost();
     int port = sourceEndpoint.getUdpPort();
-    final DiscoveryPeer peer = new DiscoveryPeer(packet.getNodeId(), host, port, tcpPort);
+    final DiscoveryPeer peer =
+        DiscoveryPeer.fromEnode(
+            EnodeURL.builder()
+                .nodeId(packet.getNodeId())
+                .ipAddress(host)
+                .listeningPort(tcpPort.orElse(port))
+                .discoveryPort(port)
+                .build());
+
     controller.ifPresent(c -> c.onMessage(packet, peer));
   }
 
@@ -314,7 +334,7 @@ public abstract class PeerDiscoveryAgent implements DisconnectCallback {
       final PeerConnection connection,
       final DisconnectMessage.DisconnectReason reason,
       final boolean initiatedByPeer) {
-    final BytesValue nodeId = connection.getPeer().getNodeId();
+    final BytesValue nodeId = connection.getPeerInfo().getNodeId();
     peerTable.tryEvict(new DefaultPeerId(nodeId));
   }
 

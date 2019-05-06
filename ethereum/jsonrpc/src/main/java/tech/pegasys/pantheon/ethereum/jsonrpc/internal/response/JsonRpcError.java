@@ -28,7 +28,7 @@ public enum JsonRpcError {
 
   // P2P related errors
   P2P_DISABLED(-32000, "P2P has been disabled. This functionality is not available"),
-  ENODE_NOT_AVAILABLE(-32000, "Enode URL not available"),
+  P2P_NETWORK_NOT_RUNNING(-32000, "P2P network is not running"),
 
   // Filter & Subscription Errors
   FILTER_NOT_FOUND(-32000, "Filter not found"),
@@ -52,6 +52,9 @@ public enum JsonRpcError {
   // Wallet errors
   COINBASE_NOT_SPECIFIED(-32000, "Coinbase must be explicitly specified"),
 
+  // Debug failures
+  PARENT_BLOCK_NOT_FOUND(-32000, "Parent block not found"),
+
   // Permissioning/Account whitelist errors
   ACCOUNT_WHITELIST_NOT_ENABLED(-32000, "Account whitelisting has not been enabled"),
   ACCOUNT_WHITELIST_EMPTY_ENTRY(-32000, "Request contains an empty list of accounts"),
@@ -67,7 +70,8 @@ public enum JsonRpcError {
   NODE_WHITELIST_DUPLICATED_ENTRY(-32000, "Request contains duplicate nodes"),
   NODE_WHITELIST_EXISTING_ENTRY(-32000, "Cannot add an existing node to whitelist"),
   NODE_WHITELIST_MISSING_ENTRY(-32000, "Cannot remove an absent node from whitelist"),
-  NODE_WHITELIST_BOOTNODE_CANNOT_BE_REMOVED(-32000, "Cannot remove a bootnode from whitelist"),
+  NODE_WHITELIST_FIXED_NODE_CANNOT_BE_REMOVED(
+      -32000, "Cannot remove a fixed node (bootnode or static node) from whitelist"),
 
   // Permissioning/persistence errors
   WHITELIST_PERSIST_FAILURE(
@@ -115,7 +119,7 @@ public enum JsonRpcError {
   public static JsonRpcError fromJson(
       @JsonProperty("code") final int code, @JsonProperty("message") final String message) {
     for (final JsonRpcError error : JsonRpcError.values()) {
-      if (error.getCode() == code) {
+      if (error.code == code && error.message.equals(message)) {
         return error;
       }
     }

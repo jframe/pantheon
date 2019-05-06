@@ -39,9 +39,9 @@ import tech.pegasys.pantheon.ethereum.core.AddressHelpers;
 import tech.pegasys.pantheon.ethereum.core.Block;
 import tech.pegasys.pantheon.ethereum.core.BlockBody;
 import tech.pegasys.pantheon.ethereum.core.BlockHeaderTestFixture;
-import tech.pegasys.pantheon.ethereum.core.PendingTransactions;
 import tech.pegasys.pantheon.ethereum.core.Util;
 import tech.pegasys.pantheon.ethereum.core.Wei;
+import tech.pegasys.pantheon.ethereum.eth.transactions.PendingTransactions;
 import tech.pegasys.pantheon.ethereum.mainnet.ProtocolSchedule;
 import tech.pegasys.pantheon.ethereum.worldstate.WorldStateArchive;
 import tech.pegasys.pantheon.metrics.MetricsSystem;
@@ -113,7 +113,11 @@ public class CliqueBlockCreatorTest {
         new CliqueBlockCreator(
             coinbase,
             parent -> extraData.encode(),
-            new PendingTransactions(5, TestClock.fixed(), metricsSystem),
+            new PendingTransactions(
+                PendingTransactions.DEFAULT_TX_RETENTION_HOURS,
+                5,
+                TestClock.fixed(),
+                metricsSystem),
             protocolContext,
             protocolSchedule,
             gasLimit -> gasLimit,
@@ -140,7 +144,11 @@ public class CliqueBlockCreatorTest {
         new CliqueBlockCreator(
             coinbase,
             parent -> extraData.encode(),
-            new PendingTransactions(5, TestClock.fixed(), metricsSystem),
+            new PendingTransactions(
+                PendingTransactions.DEFAULT_TX_RETENTION_HOURS,
+                5,
+                TestClock.fixed(),
+                metricsSystem),
             protocolContext,
             protocolSchedule,
             gasLimit -> gasLimit,
@@ -166,7 +174,11 @@ public class CliqueBlockCreatorTest {
         new CliqueBlockCreator(
             coinbase,
             parent -> extraData.encode(),
-            new PendingTransactions(5, TestClock.fixed(), metricsSystem),
+            new PendingTransactions(
+                PendingTransactions.DEFAULT_TX_RETENTION_HOURS,
+                5,
+                TestClock.fixed(),
+                metricsSystem),
             protocolContext,
             protocolSchedule,
             gasLimit -> gasLimit,
@@ -195,7 +207,11 @@ public class CliqueBlockCreatorTest {
         new CliqueBlockCreator(
             coinbase,
             parent -> extraData.encode(),
-            new PendingTransactions(5, TestClock.fixed(), metricsSystem),
+            new PendingTransactions(
+                PendingTransactions.DEFAULT_TX_RETENTION_HOURS,
+                5,
+                TestClock.fixed(),
+                metricsSystem),
             protocolContext,
             protocolSchedule,
             gasLimit -> gasLimit,

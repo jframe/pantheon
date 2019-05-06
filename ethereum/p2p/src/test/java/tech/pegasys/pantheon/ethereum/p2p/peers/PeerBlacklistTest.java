@@ -20,6 +20,7 @@ import tech.pegasys.pantheon.ethereum.p2p.api.PeerConnection;
 import tech.pegasys.pantheon.ethereum.p2p.wire.PeerInfo;
 import tech.pegasys.pantheon.ethereum.p2p.wire.messages.DisconnectMessage.DisconnectReason;
 import tech.pegasys.pantheon.util.bytes.BytesValue;
+import tech.pegasys.pantheon.util.enode.EnodeURL;
 
 import java.util.Collections;
 
@@ -199,7 +200,7 @@ public class PeerBlacklistTest {
     final PeerInfo peerInfo = mock(PeerInfo.class);
 
     when(peerInfo.getNodeId()).thenReturn(nodeId);
-    when(peer.getPeer()).thenReturn(peerInfo);
+    when(peer.getPeerInfo()).thenReturn(peerInfo);
 
     return peer;
   }
@@ -207,6 +208,12 @@ public class PeerBlacklistTest {
   private Peer generatePeer() {
     final byte[] id = new byte[64];
     id[0] = (byte) nodeIdValue++;
-    return new DefaultPeer(BytesValue.wrap(id), "10.9.8.7", 65535, 65534);
+    return DefaultPeer.fromEnodeURL(
+        EnodeURL.builder()
+            .nodeId(id)
+            .ipAddress("10.9.8.7")
+            .discoveryPort(65535)
+            .listeningPort(65534)
+            .build());
   }
 }

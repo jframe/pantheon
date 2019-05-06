@@ -32,8 +32,8 @@ import tech.pegasys.pantheon.ethereum.core.AddressHelpers;
 import tech.pegasys.pantheon.ethereum.core.Block;
 import tech.pegasys.pantheon.ethereum.core.BlockHeader;
 import tech.pegasys.pantheon.ethereum.core.BlockHeaderTestFixture;
-import tech.pegasys.pantheon.ethereum.core.PendingTransactions;
 import tech.pegasys.pantheon.ethereum.core.Wei;
+import tech.pegasys.pantheon.ethereum.eth.transactions.PendingTransactions;
 import tech.pegasys.pantheon.ethereum.mainnet.BlockHeaderValidator;
 import tech.pegasys.pantheon.ethereum.mainnet.HeaderValidationMode;
 import tech.pegasys.pantheon.ethereum.mainnet.ProtocolSchedule;
@@ -81,6 +81,10 @@ public class IbftBlockCreatorTest {
             createInMemoryWorldStateArchive(),
             setupContextWithValidators(initialValidatorList));
 
+    final PendingTransactions pendingTransactions =
+        new PendingTransactions(
+            PendingTransactions.DEFAULT_TX_RETENTION_HOURS, 1, TestClock.fixed(), metricsSystem);
+
     final IbftBlockCreator blockCreator =
         new IbftBlockCreator(
             initialValidatorList.get(0),
@@ -92,7 +96,7 @@ public class IbftBlockCreatorTest {
                         0,
                         initialValidatorList)
                     .encode(),
-            new PendingTransactions(1, TestClock.fixed(), metricsSystem),
+            pendingTransactions,
             protContext,
             protocolSchedule,
             parentGasLimit -> parentGasLimit,

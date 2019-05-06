@@ -29,7 +29,6 @@ import tech.pegasys.pantheon.ethereum.core.BlockBody;
 import tech.pegasys.pantheon.ethereum.core.BlockDataGenerator;
 import tech.pegasys.pantheon.ethereum.core.BlockHeader;
 import tech.pegasys.pantheon.ethereum.core.Hash;
-import tech.pegasys.pantheon.ethereum.core.PendingTransactions;
 import tech.pegasys.pantheon.ethereum.core.Transaction;
 import tech.pegasys.pantheon.ethereum.core.TransactionReceipt;
 import tech.pegasys.pantheon.ethereum.eth.EthProtocol;
@@ -50,6 +49,8 @@ import tech.pegasys.pantheon.ethereum.eth.messages.NodeDataMessage;
 import tech.pegasys.pantheon.ethereum.eth.messages.ReceiptsMessage;
 import tech.pegasys.pantheon.ethereum.eth.messages.StatusMessage;
 import tech.pegasys.pantheon.ethereum.eth.messages.TransactionsMessage;
+import tech.pegasys.pantheon.ethereum.eth.sync.state.SyncState;
+import tech.pegasys.pantheon.ethereum.eth.transactions.PendingTransactions;
 import tech.pegasys.pantheon.ethereum.eth.transactions.TransactionPoolFactory;
 import tech.pegasys.pantheon.ethereum.mainnet.MainnetProtocolSchedule;
 import tech.pegasys.pantheon.ethereum.mainnet.ProtocolSchedule;
@@ -117,6 +118,7 @@ public final class EthProtocolManagerTest {
             1,
             1,
             1,
+            TestClock.fixed(),
             new NoOpMetricsSystem(),
             EthereumWireProtocolConfiguration.defaultConfig())) {
       final MessageData messageData =
@@ -138,6 +140,7 @@ public final class EthProtocolManagerTest {
             1,
             1,
             1,
+            TestClock.fixed(),
             new NoOpMetricsSystem(),
             EthereumWireProtocolConfiguration.defaultConfig())) {
       final MessageData messageData =
@@ -160,6 +163,7 @@ public final class EthProtocolManagerTest {
             1,
             1,
             1,
+            TestClock.fixed(),
             new NoOpMetricsSystem(),
             EthereumWireProtocolConfiguration.defaultConfig())) {
       final MessageData messageData =
@@ -193,6 +197,7 @@ public final class EthProtocolManagerTest {
             1,
             1,
             1,
+            TestClock.fixed(),
             new NoOpMetricsSystem(),
             EthereumWireProtocolConfiguration.defaultConfig())) {
       final MessageData messageData =
@@ -226,6 +231,7 @@ public final class EthProtocolManagerTest {
             1,
             1,
             1,
+            TestClock.fixed(),
             new NoOpMetricsSystem(),
             EthereumWireProtocolConfiguration.defaultConfig())) {
       final MessageData messageData =
@@ -251,6 +257,7 @@ public final class EthProtocolManagerTest {
             1,
             1,
             1,
+            TestClock.fixed(),
             new NoOpMetricsSystem(),
             EthereumWireProtocolConfiguration.defaultConfig())) {
       final long startBlock = 5L;
@@ -292,6 +299,7 @@ public final class EthProtocolManagerTest {
             1,
             1,
             1,
+            TestClock.fixed(),
             new NoOpMetricsSystem(),
             new EthereumWireProtocolConfiguration(limit, limit, limit, limit))) {
       final long startBlock = 5L;
@@ -332,6 +340,7 @@ public final class EthProtocolManagerTest {
             1,
             1,
             1,
+            TestClock.fixed(),
             new NoOpMetricsSystem(),
             EthereumWireProtocolConfiguration.defaultConfig())) {
       final long endBlock = 10L;
@@ -371,6 +380,7 @@ public final class EthProtocolManagerTest {
             1,
             1,
             1,
+            TestClock.fixed(),
             new NoOpMetricsSystem(),
             EthereumWireProtocolConfiguration.defaultConfig())) {
       final long startBlock = 5L;
@@ -413,6 +423,7 @@ public final class EthProtocolManagerTest {
             1,
             1,
             1,
+            TestClock.fixed(),
             new NoOpMetricsSystem(),
             EthereumWireProtocolConfiguration.defaultConfig())) {
       final long endBlock = 10L;
@@ -476,6 +487,7 @@ public final class EthProtocolManagerTest {
             1,
             1,
             1,
+            TestClock.fixed(),
             new NoOpMetricsSystem(),
             EthereumWireProtocolConfiguration.defaultConfig())) {
       final long startBlock = blockchain.getChainHeadBlockNumber() - 1L;
@@ -516,6 +528,7 @@ public final class EthProtocolManagerTest {
             1,
             1,
             1,
+            TestClock.fixed(),
             new NoOpMetricsSystem(),
             EthereumWireProtocolConfiguration.defaultConfig())) {
       final long startBlock = blockchain.getChainHeadBlockNumber() + 1;
@@ -553,6 +566,7 @@ public final class EthProtocolManagerTest {
             1,
             1,
             1,
+            TestClock.fixed(),
             new NoOpMetricsSystem(),
             EthereumWireProtocolConfiguration.defaultConfig())) {
       // Setup blocks query
@@ -606,6 +620,7 @@ public final class EthProtocolManagerTest {
             1,
             1,
             1,
+            TestClock.fixed(),
             new NoOpMetricsSystem(),
             new EthereumWireProtocolConfiguration(limit, limit, limit, limit))) {
       // Setup blocks query
@@ -658,6 +673,7 @@ public final class EthProtocolManagerTest {
             1,
             1,
             1,
+            TestClock.fixed(),
             new NoOpMetricsSystem(),
             EthereumWireProtocolConfiguration.defaultConfig())) {
       // Setup blocks query
@@ -704,6 +720,7 @@ public final class EthProtocolManagerTest {
             1,
             1,
             1,
+            TestClock.fixed(),
             new NoOpMetricsSystem(),
             EthereumWireProtocolConfiguration.defaultConfig())) {
       // Setup blocks query
@@ -756,6 +773,7 @@ public final class EthProtocolManagerTest {
             1,
             1,
             1,
+            TestClock.fixed(),
             new NoOpMetricsSystem(),
             new EthereumWireProtocolConfiguration(limit, limit, limit, limit))) {
       // Setup blocks query
@@ -807,6 +825,7 @@ public final class EthProtocolManagerTest {
             1,
             1,
             1,
+            TestClock.fixed(),
             new NoOpMetricsSystem(),
             EthereumWireProtocolConfiguration.defaultConfig())) {
       // Setup blocks query
@@ -855,6 +874,7 @@ public final class EthProtocolManagerTest {
             1,
             1,
             1,
+            TestClock.fixed(),
             new NoOpMetricsSystem(),
             EthereumWireProtocolConfiguration.defaultConfig())) {
       // Setup node data query
@@ -906,6 +926,7 @@ public final class EthProtocolManagerTest {
             1,
             1,
             1,
+            TestClock.fixed(),
             new NoOpMetricsSystem(),
             EthereumWireProtocolConfiguration.defaultConfig());
 
@@ -978,6 +999,7 @@ public final class EthProtocolManagerTest {
             1,
             1,
             1,
+            TestClock.fixed(),
             new NoOpMetricsSystem(),
             EthereumWireProtocolConfiguration.defaultConfig())) {
       final long startBlock = 1L;
@@ -1044,7 +1066,9 @@ public final class EthProtocolManagerTest {
             1,
             true,
             ethScheduler,
-            EthereumWireProtocolConfiguration.defaultConfig())) {
+            EthereumWireProtocolConfiguration.defaultConfig(),
+            TestClock.fixed(),
+            metricsSystem)) {
 
       // Create a transaction pool.  This has a side effect of registring a listener for the
       // transactions message.
@@ -1054,7 +1078,9 @@ public final class EthProtocolManagerTest {
           ethManager.ethContext(),
           TestClock.fixed(),
           PendingTransactions.MAX_PENDING_TRANSACTIONS,
-          metricsSystem);
+          metricsSystem,
+          mock(SyncState.class),
+          PendingTransactions.DEFAULT_TX_RETENTION_HOURS);
 
       // Send just a transaction message.
       final PeerConnection peer = setupPeer(ethManager, (cap, msg, connection) -> {});
@@ -1063,7 +1089,7 @@ public final class EthProtocolManagerTest {
       // Verify the regular message executor and scheduled executor got nothing to execute.
       verifyZeroInteractions(worker, scheduled);
       // Verify our transactions executor got something to execute.
-      verify(transactions).submit((Runnable) any());
+      verify(transactions).execute(any());
     }
   }
 }
