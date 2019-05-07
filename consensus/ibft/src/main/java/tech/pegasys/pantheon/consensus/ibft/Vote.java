@@ -12,6 +12,7 @@
  */
 package tech.pegasys.pantheon.consensus.ibft;
 
+import com.google.common.base.MoreObjects;
 import tech.pegasys.pantheon.consensus.common.VoteType;
 import tech.pegasys.pantheon.ethereum.core.Address;
 import tech.pegasys.pantheon.ethereum.rlp.RLPException;
@@ -97,5 +98,13 @@ public class Vote {
     rlpInput.leaveList();
 
     return new Vote(recipient, vote);
+  }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this)
+        .add("recipient", recipient)
+        .add("voteType", voteType)
+        .toString();
   }
 }
