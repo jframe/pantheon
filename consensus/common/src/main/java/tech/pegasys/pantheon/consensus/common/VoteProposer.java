@@ -12,8 +12,6 @@
  */
 package tech.pegasys.pantheon.consensus.common;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import tech.pegasys.pantheon.ethereum.core.Address;
 
 import java.util.ArrayList;
@@ -23,6 +21,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /** Container for pending votes and selecting a vote for new blocks */
 public class VoteProposer {
