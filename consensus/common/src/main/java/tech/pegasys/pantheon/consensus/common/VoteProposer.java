@@ -12,6 +12,8 @@
  */
 package tech.pegasys.pantheon.consensus.common;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import tech.pegasys.pantheon.ethereum.core.Address;
 
 import java.util.ArrayList;
@@ -24,7 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /** Container for pending votes and selecting a vote for new blocks */
 public class VoteProposer {
-
+  private static final Logger LOG = LogManager.getLogger();
   private final Map<Address, VoteType> proposals = new ConcurrentHashMap<>();
   private final AtomicInteger votePosition = new AtomicInteger(0);
 
@@ -35,6 +37,7 @@ public class VoteProposer {
    */
   public void auth(final Address address) {
     proposals.put(address, VoteType.ADD);
+    LOG.trace("Vote tally added {} proposals={}", address, proposals);
   }
 
   /**
@@ -44,6 +47,7 @@ public class VoteProposer {
    */
   public void drop(final Address address) {
     proposals.put(address, VoteType.DROP);
+    LOG.trace("Vote tally dropped {} proposals={}", address, proposals);
   }
 
   /**
@@ -53,6 +57,7 @@ public class VoteProposer {
    */
   public void discard(final Address address) {
     proposals.remove(address);
+    LOG.trace("Vote tally discarded {} proposals={}", address, proposals);
   }
 
   public Map<Address, VoteType> getProposals() {
