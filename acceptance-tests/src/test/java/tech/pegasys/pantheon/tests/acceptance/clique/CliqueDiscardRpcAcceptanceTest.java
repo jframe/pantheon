@@ -37,12 +37,12 @@ public class CliqueDiscardRpcAcceptanceTest extends AcceptanceTestBase {
     final WaitCondition validatorsChanged = wait.cliqueValidatorsChanged(minerNode1);
 
     minerNode1.execute(cliqueTransactions.createRemoveProposal(minerNode2));
+    minerNode1.execute(cliqueTransactions.createDiscardProposal(minerNode2));
     minerNode1.execute(cliqueTransactions.createAddProposal(minerNode3));
 
     minerNode2.execute(cliqueTransactions.createRemoveProposal(minerNode2));
     minerNode2.execute(cliqueTransactions.createAddProposal(minerNode3));
 
-    minerNode1.execute(cliqueTransactions.createDiscardProposal(minerNode2));
 
     cluster.waitUntil(validatorsChanged);
     cluster.verify(clique.validatorsEqual(minerNode1, minerNode2, minerNode3));

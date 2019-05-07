@@ -34,12 +34,11 @@ public class IbftDiscardRpcAcceptanceTest extends AcceptanceTestBase {
     final WaitCondition validatorsChanged = wait.ibftValidatorsChanged(validator1);
 
     validator1.execute(ibftTransactions.createRemoveProposal(validator2));
+    validator1.execute(ibftTransactions.createDiscardProposal(validator2));
     validator1.execute(ibftTransactions.createAddProposal(validator3));
 
     validator2.execute(ibftTransactions.createRemoveProposal(validator2));
     validator2.execute(ibftTransactions.createAddProposal(validator3));
-
-    validator1.execute(ibftTransactions.createDiscardProposal(validator2));
 
     cluster.waitUntil(validatorsChanged);
 
