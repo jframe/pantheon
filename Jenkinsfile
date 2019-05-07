@@ -143,7 +143,7 @@ try {
                             sh './gradlew --no-daemon --parallel clean compileJava compileTestJava assemble'
                         }
                         stage(stage_name + 'Acceptance Tests') {
-                            sh './gradlew --no-daemon --parallel acceptanceTest'
+                            sh './gradlew --no-daemon --parallel  --tests *DiscardRpcAcceptanceTest acceptanceTest'
                         }
                     } finally {
                         archiveArtifacts '**/build/reports/**'
