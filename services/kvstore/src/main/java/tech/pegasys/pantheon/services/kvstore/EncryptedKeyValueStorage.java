@@ -17,6 +17,8 @@ import tech.pegasys.pantheon.util.bytes.BytesValue;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 import javax.crypto.SecretKey;
@@ -29,33 +31,34 @@ public class EncryptedKeyValueStorage implements KeyValueStorage, Closeable {
   private static final Logger LOG = LogManager.getLogger();
 
   private KeyValueStorage keyValueStorage;
-  private final SecretKey secretKey;
-  private final byte[] iv;
+  private final AesEncryption aesEncryption;
 
   // TODO add metrics
   public EncryptedKeyValueStorage(
-      final KeyValueStorage keyValueStorage, final SecretKey secretKey, final byte[] iv) {
+      final KeyValueStorage keyValueStorage, final SecretKey secretKey, final byte[] iv)
+      throws InvalidAlgorithmParameterException, InvalidKeyException {
     this.keyValueStorage = keyValueStorage;
-    this.secretKey = secretKey;
-    this.iv = iv;
+    this.aesEncryption = new AesEncryption(secretKey, iv);
   }
 
   public static EncryptedKeyValueStorage create(final KeyValueStorage keyValueStorage)
       throws StorageException {
     try {
-      final SecretKey key = AesEncryption.key();
-      final byte[] iv = AesEncryption.iv();
+      final SecretKey key = AesEncryption.createKey();
+      final byte[] iv = AesEncryption.createIv();
       return new EncryptedKeyValueStorage(keyValueStorage, key, iv);
-    } catch (NoSuchAlgorithmException e) {
+    } catch (NoSuchAlgorithmException
+        | InvalidAlgorithmParameterException
+        | InvalidKeyException e) {
       throw new IllegalStateException("Error creating private key", e);
     }
   }
 
   @Override
   public Optional<BytesValue> get(final BytesValue key) throws StorageException {
-    final BytesValue decryptedKey = AesEncryption.decrypt(key, secretKey, iv);
+    final BytesValue decryptedKey = aesEncryption.decrypt(key);
     final Optional<BytesValue> bytesValue = keyValueStorage.get(decryptedKey);
-    return bytesValue.map(data -> AesEncryption.decrypt(data, secretKey, iv));
+    return bytesValue.map(aesEncryption::decrypt);
   }
 
   @Override
@@ -81,14 +84,14 @@ public class EncryptedKeyValueStorage implements KeyValueStorage, Closeable {
 
     @Override
     protected void doPut(final BytesValue key, final BytesValue value) {
-      final BytesValue encryptedKey = AesEncryption.encrypt(key, secretKey, iv);
-      final BytesValue encryptedValue = AesEncryption.encrypt(value, secretKey, iv);
+      final BytesValue encryptedKey = aesEncryption.encrypt(key);
+      final BytesValue encryptedValue = aesEncryption.encrypt(value);
       transaction.put(encryptedKey, encryptedValue);
     }
 
     @Override
     protected void doRemove(final BytesValue key) {
-      final BytesValue encryptedKey = AesEncryption.encrypt(key, secretKey, iv);
+      final BytesValue encryptedKey = aesEncryption.encrypt(key);
       transaction.remove(encryptedKey);
     }
 

@@ -15,51 +15,62 @@ package tech.pegasys.pantheon.crypto;
 import tech.pegasys.pantheon.util.bytes.BytesValue;
 
 import java.security.GeneralSecurityException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class AesEncryption {
+  private static final Logger LOG = LogManager.getLogger();
+  private final Cipher encryptCipher;
+  private final Cipher decryptCipher;
 
-  public static BytesValue encrypt(final BytesValue data, final SecretKey key, final byte[] iv) {
+  public AesEncryption(final SecretKey key, final byte[] iv)
+      throws InvalidAlgorithmParameterException, InvalidKeyException {
+    encryptCipher = getCipher();
+    encryptCipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(iv));
+    decryptCipher = getCipher();
+    decryptCipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv));
+  }
+
+  private Cipher getCipher() {
     try {
-      return BytesValue.wrap(encrypt(data.extractArray(), key, iv));
+      return Cipher.getInstance("AES/CTR/NoPadding");
+    } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+      throw new IllegalStateException("Unable to obtain cipher for blockchain encryption");
+    }
+  }
+
+  public BytesValue encrypt(final BytesValue data) {
+    try {
+      return BytesValue.wrap(encryptCipher.doFinal(data.extractArray()));
     } catch (GeneralSecurityException e) {
       throw new IllegalStateException(e);
     }
   }
 
-  public static byte[] encrypt(final byte[] data, final SecretKey key, final byte[] iv)
-      throws GeneralSecurityException {
-    final Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding");
-    cipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(iv));
-    return cipher.doFinal(data);
-  }
-
-  public static BytesValue decrypt(final BytesValue data, final SecretKey key, final byte[] iv) {
+  public BytesValue decrypt(final BytesValue data) {
     try {
-      return BytesValue.wrap(decrypt(data.extractArray(), key, iv));
+      return BytesValue.wrap(decryptCipher.doFinal(data.extractArray()));
     } catch (GeneralSecurityException e) {
       throw new IllegalStateException(e);
     }
   }
 
-  public static byte[] decrypt(final byte[] data, final SecretKey key, final byte[] iv)
-      throws GeneralSecurityException {
-    final Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding");
-    cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv));
-    return cipher.doFinal(data);
-  }
-
-  public static SecretKey key() throws NoSuchAlgorithmException {
+  public static SecretKey createKey() throws NoSuchAlgorithmException {
     KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
     keyGenerator.init(256);
     return keyGenerator.generateKey();
   }
 
-  public static byte[] iv() throws NoSuchAlgorithmException {
+  public static byte[] createIv() throws NoSuchAlgorithmException {
     KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
     keyGenerator.init(8 * 16); // IV must be 16 bytes
     return keyGenerator.generateKey().getEncoded();
