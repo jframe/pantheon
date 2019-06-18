@@ -12,15 +12,17 @@
  */
 package tech.pegasys.pantheon.services.kvstore;
 
+import tech.pegasys.pantheon.crypto.AesEncryption;
+import tech.pegasys.pantheon.util.bytes.BytesValue;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 import javax.crypto.SecretKey;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import tech.pegasys.pantheon.crypto.AesEncryption;
-import tech.pegasys.pantheon.util.bytes.BytesValue;
 
 public class EncryptedKeyValueStorage implements KeyValueStorage, Closeable {
 
@@ -31,15 +33,14 @@ public class EncryptedKeyValueStorage implements KeyValueStorage, Closeable {
   private final byte[] iv;
 
   // TODO add metrics
-  public EncryptedKeyValueStorage(final KeyValueStorage keyValueStorage,
-      final SecretKey secretKey, final byte[] iv) {
+  public EncryptedKeyValueStorage(
+      final KeyValueStorage keyValueStorage, final SecretKey secretKey, final byte[] iv) {
     this.keyValueStorage = keyValueStorage;
     this.secretKey = secretKey;
     this.iv = iv;
   }
 
-  public static EncryptedKeyValueStorage create(
-      final KeyValueStorage keyValueStorage)
+  public static EncryptedKeyValueStorage create(final KeyValueStorage keyValueStorage)
       throws StorageException {
     try {
       final SecretKey key = AesEncryption.key();
@@ -101,5 +102,4 @@ public class EncryptedKeyValueStorage implements KeyValueStorage, Closeable {
       transaction.rollback();
     }
   }
-
 }

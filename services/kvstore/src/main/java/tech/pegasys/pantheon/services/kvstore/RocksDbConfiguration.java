@@ -28,6 +28,7 @@ public class RocksDbConfiguration {
   private final String label;
   private final int maxBackgroundCompactions;
   private final int backgroundThreadCount;
+  private final boolean encryptionEnabled;
 
   public RocksDbConfiguration(
       final Path databaseDir,
@@ -35,7 +36,8 @@ public class RocksDbConfiguration {
       final int maxBackgroundCompactions,
       final int backgroundThreadCount,
       final LRUCache cache,
-      final String label) {
+      final String label,
+      final boolean encryptionEnabled) {
     this.maxBackgroundCompactions = maxBackgroundCompactions;
     this.backgroundThreadCount = backgroundThreadCount;
     RocksDbUtil.loadNativeLibrary();
@@ -43,6 +45,7 @@ public class RocksDbConfiguration {
     this.maxOpenFiles = maxOpenFiles;
     this.blockBasedTableConfig = new BlockBasedTableConfig().setBlockCache(cache);
     this.label = label;
+    this.encryptionEnabled = encryptionEnabled;
   }
 
   public Path getDatabaseDir() {
@@ -67,6 +70,10 @@ public class RocksDbConfiguration {
 
   public String getLabel() {
     return label;
+  }
+
+  public boolean getEncryptionEnabled() {
+    return encryptionEnabled;
   }
 
   public static class Builder {
@@ -108,6 +115,14 @@ public class RocksDbConfiguration {
         description = "Number of RocksDB background threads (default: ${DEFAULT-VALUE})")
     int backgroundThreadCount;
 
+    @CommandLine.Option(
+        names = {"--Xrocksdb-encryption-enabled"},
+        hidden = true,
+        defaultValue = "false",
+        paramLabel = "<BOOLEAN>",
+        description = "Enables encryption of RocksDB (default: ${DEFAULT-VALUE})")
+    boolean encryptionEnabled;
+
     public Builder databaseDir(final Path databaseDir) {
       this.databaseDir = databaseDir;
       return this;
@@ -138,6 +153,11 @@ public class RocksDbConfiguration {
       return this;
     }
 
+    public Builder encryptionEnabled(final boolean encryptionEnabled) {
+      this.encryptionEnabled = encryptionEnabled;
+      return this;
+    }
+
     private LRUCache createCache(final long cacheCapacity) {
       RocksDbUtil.loadNativeLibrary();
       return new LRUCache(cacheCapacity);
@@ -148,7 +168,13 @@ public class RocksDbConfiguration {
         cache = createCache(cacheCapacity);
       }
       return new RocksDbConfiguration(
-          databaseDir, maxOpenFiles, maxBackgroundCompactions, backgroundThreadCount, cache, label);
+          databaseDir,
+          maxOpenFiles,
+          maxBackgroundCompactions,
+          backgroundThreadCount,
+          cache,
+          label,
+          encryptionEnabled);
     }
   }
 }
