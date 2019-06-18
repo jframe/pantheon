@@ -32,19 +32,22 @@ public class AesEncryption {
   private final Cipher encryptCipher;
   private final Cipher decryptCipher;
 
-  public AesEncryption(final SecretKey key, final byte[] iv)
-      throws InvalidAlgorithmParameterException, InvalidKeyException {
-    encryptCipher = getCipher();
-    encryptCipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(iv));
-    decryptCipher = getCipher();
-    decryptCipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv));
+  public AesEncryption(final SecretKey key, final byte[] iv) {
+    encryptCipher = createCipher(Cipher.ENCRYPT_MODE, key, iv);
+    decryptCipher = createCipher(Cipher.DECRYPT_MODE, key, iv);
+    LOG.debug("AES encryption cipher is using vendor {}", encryptCipher.getProvider().getName());
   }
 
-  private Cipher getCipher() {
+  private Cipher createCipher(final int encryptMode, final SecretKey key, final byte[] iv) {
     try {
-      return Cipher.getInstance("AES/CTR/NoPadding");
-    } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-      throw new IllegalStateException("Unable to obtain cipher for blockchain encryption");
+      final Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding");
+      cipher.init(encryptMode, key, new IvParameterSpec(iv));
+      return cipher;
+    } catch (NoSuchAlgorithmException
+        | NoSuchPaddingException
+        | InvalidKeyException
+        | InvalidAlgorithmParameterException e) {
+      throw new IllegalStateException("Unable to obtain AES cipher for chain encryption");
     }
   }
 

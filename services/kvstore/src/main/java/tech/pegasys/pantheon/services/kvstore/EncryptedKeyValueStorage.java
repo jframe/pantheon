@@ -22,8 +22,6 @@ import tech.pegasys.pantheon.util.bytes.BytesValue;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 import javax.crypto.SecretKey;
@@ -44,8 +42,7 @@ public class EncryptedKeyValueStorage implements KeyValueStorage, Closeable {
       final MetricsSystem metricsSystem,
       final KeyValueStorage keyValueStorage,
       final SecretKey secretKey,
-      final byte[] iv)
-      throws InvalidAlgorithmParameterException, InvalidKeyException {
+      final byte[] iv) {
     this.keyValueStorage = keyValueStorage;
     this.aesEncryption = new AesEncryption(secretKey, iv);
 
@@ -91,9 +88,7 @@ public class EncryptedKeyValueStorage implements KeyValueStorage, Closeable {
       final byte[] iv = AesEncryption.createIv();
       return new EncryptedKeyValueStorage(
           rocksDbConfiguration, metricsSystem, keyValueStorage, key, iv);
-    } catch (NoSuchAlgorithmException
-        | InvalidAlgorithmParameterException
-        | InvalidKeyException e) {
+    } catch (NoSuchAlgorithmException e) {
       throw new IllegalStateException("Error creating private key", e);
     }
   }
