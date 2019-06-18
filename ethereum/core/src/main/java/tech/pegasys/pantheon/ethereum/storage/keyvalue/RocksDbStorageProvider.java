@@ -37,7 +37,8 @@ public class RocksDbStorageProvider {
       throws IOException {
     Files.createDirectories(rocksDbConfiguration.getDatabaseDir());
     final KeyValueStorage kv = RocksDbKeyValueStorage.create(rocksDbConfiguration, metricsSystem);
-    final KeyValueStorage encryptedKv = EncryptedKeyValueStorage.create(kv);
+    final KeyValueStorage encryptedKv =
+        EncryptedKeyValueStorage.create(rocksDbConfiguration, metricsSystem, kv);
     return new KeyValueStorageProvider(encryptedKv);
   }
 }

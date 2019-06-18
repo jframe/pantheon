@@ -13,6 +13,11 @@
 package tech.pegasys.pantheon.services.kvstore;
 
 import tech.pegasys.pantheon.crypto.AesEncryption;
+import tech.pegasys.pantheon.metrics.MetricCategory;
+import tech.pegasys.pantheon.metrics.MetricsSystem;
+import tech.pegasys.pantheon.metrics.OperationTimer;
+import tech.pegasys.pantheon.metrics.prometheus.PrometheusMetricsSystem;
+import tech.pegasys.pantheon.metrics.rocksdb.RocksDBStats;
 import tech.pegasys.pantheon.util.bytes.BytesValue;
 
 import java.io.Closeable;
@@ -23,30 +28,69 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 import javax.crypto.SecretKey;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.rocksdb.Statistics;
 
 public class EncryptedKeyValueStorage implements KeyValueStorage, Closeable {
 
-  private static final Logger LOG = LogManager.getLogger();
-
-  private KeyValueStorage keyValueStorage;
+  private final KeyValueStorage keyValueStorage;
   private final AesEncryption aesEncryption;
 
-  // TODO add metrics
-  public EncryptedKeyValueStorage(
-      final KeyValueStorage keyValueStorage, final SecretKey secretKey, final byte[] iv)
+  private final OperationTimer readLatency;
+  private final OperationTimer removeLatency;
+  private final OperationTimer writeLatency;
+
+  private EncryptedKeyValueStorage(
+      final RocksDbConfiguration rocksDbConfiguration,
+      final MetricsSystem metricsSystem,
+      final KeyValueStorage keyValueStorage,
+      final SecretKey secretKey,
+      final byte[] iv)
       throws InvalidAlgorithmParameterException, InvalidKeyException {
     this.keyValueStorage = keyValueStorage;
     this.aesEncryption = new AesEncryption(secretKey, iv);
+
+    final Statistics stats = new Statistics();
+
+    readLatency =
+        metricsSystem
+            .createLabelledTimer(
+                MetricCategory.KVSTORE_ROCKSDB,
+                "encrypted_read_latency_seconds",
+                "Latency for encrypted read from RocksDB.",
+                "database")
+            .labels(rocksDbConfiguration.getLabel());
+    removeLatency =
+        metricsSystem
+            .createLabelledTimer(
+                MetricCategory.KVSTORE_ROCKSDB,
+                "encrypted_remove_latency_seconds",
+                "Latency of remove encrypted requests from RocksDB.",
+                "database")
+            .labels(rocksDbConfiguration.getLabel());
+    writeLatency =
+        metricsSystem
+            .createLabelledTimer(
+                MetricCategory.KVSTORE_ROCKSDB,
+                "encrypted_write_latency_seconds",
+                "Latency for encrypted write to RocksDB.",
+                "database")
+            .labels(rocksDbConfiguration.getLabel());
+
+    if (metricsSystem instanceof PrometheusMetricsSystem) {
+      RocksDBStats.registerRocksDBMetrics(stats, (PrometheusMetricsSystem) metricsSystem);
+    }
   }
 
-  public static EncryptedKeyValueStorage create(final KeyValueStorage keyValueStorage)
+  public static EncryptedKeyValueStorage create(
+      final RocksDbConfiguration rocksDbConfiguration,
+      final MetricsSystem metricsSystem,
+      final KeyValueStorage keyValueStorage)
       throws StorageException {
     try {
       final SecretKey key = AesEncryption.createKey();
       final byte[] iv = AesEncryption.createIv();
-      return new EncryptedKeyValueStorage(keyValueStorage, key, iv);
+      return new EncryptedKeyValueStorage(
+          rocksDbConfiguration, metricsSystem, keyValueStorage, key, iv);
     } catch (NoSuchAlgorithmException
         | InvalidAlgorithmParameterException
         | InvalidKeyException e) {
@@ -56,9 +100,11 @@ public class EncryptedKeyValueStorage implements KeyValueStorage, Closeable {
 
   @Override
   public Optional<BytesValue> get(final BytesValue key) throws StorageException {
-    final BytesValue decryptedKey = aesEncryption.decrypt(key);
-    final Optional<BytesValue> bytesValue = keyValueStorage.get(decryptedKey);
-    return bytesValue.map(aesEncryption::decrypt);
+    try (final OperationTimer.TimingContext ignored = readLatency.startTimer()) {
+      final BytesValue decryptedKey = aesEncryption.decrypt(key);
+      final Optional<BytesValue> bytesValue = keyValueStorage.get(decryptedKey);
+      return bytesValue.map(aesEncryption::decrypt);
+    }
   }
 
   @Override
@@ -84,15 +130,19 @@ public class EncryptedKeyValueStorage implements KeyValueStorage, Closeable {
 
     @Override
     protected void doPut(final BytesValue key, final BytesValue value) {
-      final BytesValue encryptedKey = aesEncryption.encrypt(key);
-      final BytesValue encryptedValue = aesEncryption.encrypt(value);
-      transaction.put(encryptedKey, encryptedValue);
+      try (final OperationTimer.TimingContext ignored = writeLatency.startTimer()) {
+        final BytesValue encryptedKey = aesEncryption.encrypt(key);
+        final BytesValue encryptedValue = aesEncryption.encrypt(value);
+        transaction.put(encryptedKey, encryptedValue);
+      }
     }
 
     @Override
     protected void doRemove(final BytesValue key) {
-      final BytesValue encryptedKey = aesEncryption.encrypt(key);
-      transaction.remove(encryptedKey);
+      try (final OperationTimer.TimingContext ignored = removeLatency.startTimer()) {
+        final BytesValue encryptedKey = aesEncryption.encrypt(key);
+        transaction.remove(encryptedKey);
+      }
     }
 
     @Override
