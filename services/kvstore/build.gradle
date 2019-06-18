@@ -31,6 +31,7 @@ dependencies {
   implementation project(':metrics:core')
   implementation project(':metrics:rocksdb')
   implementation project(':services:util')
+  implementation project(':crypto')
 
   implementation 'com.google.guava:guava'
   implementation 'info.picocli:picocli'

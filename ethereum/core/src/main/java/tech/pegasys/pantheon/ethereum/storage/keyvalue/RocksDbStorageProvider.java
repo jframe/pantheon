@@ -14,6 +14,7 @@ package tech.pegasys.pantheon.ethereum.storage.keyvalue;
 
 import tech.pegasys.pantheon.ethereum.storage.StorageProvider;
 import tech.pegasys.pantheon.metrics.MetricsSystem;
+import tech.pegasys.pantheon.services.kvstore.EncryptedKeyValueStorage;
 import tech.pegasys.pantheon.services.kvstore.KeyValueStorage;
 import tech.pegasys.pantheon.services.kvstore.RocksDbConfiguration;
 import tech.pegasys.pantheon.services.kvstore.RocksDbKeyValueStorage;
@@ -29,5 +30,13 @@ public class RocksDbStorageProvider {
     Files.createDirectories(rocksDbConfiguration.getDatabaseDir());
     final KeyValueStorage kv = RocksDbKeyValueStorage.create(rocksDbConfiguration, metricsSystem);
     return new KeyValueStorageProvider(kv);
+  }
+
+  public static StorageProvider createEncrypted(final RocksDbConfiguration rocksDbConfiguration, final MetricsSystem metricsSystem)
+      throws IOException {
+    Files.createDirectories(rocksDbConfiguration.getDatabaseDir());
+    final KeyValueStorage kv = RocksDbKeyValueStorage.create(rocksDbConfiguration, metricsSystem);
+    final KeyValueStorage encryptedKv = EncryptedKeyValueStorage.create(kv);
+    return new KeyValueStorageProvider(encryptedKv);
   }
 }

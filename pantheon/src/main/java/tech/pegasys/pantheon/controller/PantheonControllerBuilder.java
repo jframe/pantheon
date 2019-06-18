@@ -180,7 +180,9 @@ public abstract class PantheonControllerBuilder<C> {
     privacyParameters.setSigningKeyPair(nodeKeys);
 
     if (storageProvider == null && rocksDbConfiguration != null) {
-      storageProvider = RocksDbStorageProvider.create(rocksDbConfiguration, metricsSystem);
+      // TODO use encrypted only on feature toggle flag
+      storageProvider = RocksDbStorageProvider.createEncrypted(rocksDbConfiguration, metricsSystem);
+//      storageProvider = RocksDbStorageProvider.create(rocksDbConfiguration, metricsSystem);
     }
 
     prepForBuild();
