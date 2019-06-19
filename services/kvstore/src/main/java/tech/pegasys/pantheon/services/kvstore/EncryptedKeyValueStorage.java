@@ -23,7 +23,6 @@ import tech.pegasys.pantheon.util.bytes.BytesValue;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 import javax.crypto.SecretKey;
 
@@ -79,17 +78,12 @@ public class EncryptedKeyValueStorage implements KeyValueStorage, Closeable {
   }
 
   public static EncryptedKeyValueStorage create(
+      final SecretKey key,
       final RocksDbConfiguration rocksDbConfiguration,
       final MetricsSystem metricsSystem,
       final KeyValueStorage keyValueStorage)
       throws StorageException {
-    try {
-      final SecretKey key = AesEncryption.createKey();
-      return new EncryptedKeyValueStorage(
-          rocksDbConfiguration, metricsSystem, keyValueStorage, key);
-    } catch (NoSuchAlgorithmException e) {
-      throw new IllegalStateException("Error creating private key", e);
-    }
+    return new EncryptedKeyValueStorage(rocksDbConfiguration, metricsSystem, keyValueStorage, key);
   }
 
   @Override

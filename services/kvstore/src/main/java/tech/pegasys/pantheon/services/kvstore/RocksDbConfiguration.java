@@ -14,6 +14,7 @@ package tech.pegasys.pantheon.services.kvstore;
 
 import tech.pegasys.pantheon.services.util.RocksDbUtil;
 
+import java.io.File;
 import java.nio.file.Path;
 
 import org.rocksdb.BlockBasedTableConfig;
@@ -28,6 +29,7 @@ public class RocksDbConfiguration {
   private final String label;
   private final int maxBackgroundCompactions;
   private final int backgroundThreadCount;
+  private File encryptionKey;
   private final boolean encryptionEnabled;
 
   public RocksDbConfiguration(
@@ -37,7 +39,8 @@ public class RocksDbConfiguration {
       final int backgroundThreadCount,
       final LRUCache cache,
       final String label,
-      final boolean encryptionEnabled) {
+      final boolean encryptionEnabled,
+      final File encryptionKey) {
     this.maxBackgroundCompactions = maxBackgroundCompactions;
     this.backgroundThreadCount = backgroundThreadCount;
     RocksDbUtil.loadNativeLibrary();
@@ -46,6 +49,7 @@ public class RocksDbConfiguration {
     this.blockBasedTableConfig = new BlockBasedTableConfig().setBlockCache(cache);
     this.label = label;
     this.encryptionEnabled = encryptionEnabled;
+    this.encryptionKey = encryptionKey;
   }
 
   public Path getDatabaseDir() {
@@ -74,6 +78,10 @@ public class RocksDbConfiguration {
 
   public boolean getEncryptionEnabled() {
     return encryptionEnabled;
+  }
+
+  public File getEncryptionKey() {
+    return encryptionKey;
   }
 
   public static class Builder {
@@ -123,6 +131,12 @@ public class RocksDbConfiguration {
         description = "Enables encryption of RocksDB (default: ${DEFAULT-VALUE})")
     boolean encryptionEnabled;
 
+    @CommandLine.Option(
+        names = {"--Xrocksdb-encryption-key"},
+        hidden = true,
+        description = "Private key used for encryption of RocksDB")
+    File encryptionKey;
+
     public Builder databaseDir(final Path databaseDir) {
       this.databaseDir = databaseDir;
       return this;
@@ -158,6 +172,11 @@ public class RocksDbConfiguration {
       return this;
     }
 
+    public Builder encryptionEnabled(final File encryptionKey) {
+      this.encryptionKey = encryptionKey;
+      return this;
+    }
+
     private LRUCache createCache(final long cacheCapacity) {
       RocksDbUtil.loadNativeLibrary();
       return new LRUCache(cacheCapacity);
@@ -174,7 +193,8 @@ public class RocksDbConfiguration {
           backgroundThreadCount,
           cache,
           label,
-          encryptionEnabled);
+          encryptionEnabled,
+          encryptionKey);
     }
   }
 }

@@ -21,6 +21,7 @@ import tech.pegasys.pantheon.services.kvstore.RocksDbKeyValueStorage;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import javax.crypto.SecretKey;
 
 public class RocksDbStorageProvider {
 
@@ -33,12 +34,14 @@ public class RocksDbStorageProvider {
   }
 
   public static StorageProvider createEncrypted(
-      final RocksDbConfiguration rocksDbConfiguration, final MetricsSystem metricsSystem)
+      final SecretKey secretKey,
+      final RocksDbConfiguration rocksDbConfiguration,
+      final MetricsSystem metricsSystem)
       throws IOException {
     Files.createDirectories(rocksDbConfiguration.getDatabaseDir());
     final KeyValueStorage kv = RocksDbKeyValueStorage.create(rocksDbConfiguration, metricsSystem);
     final KeyValueStorage encryptedKv =
-        EncryptedKeyValueStorage.create(rocksDbConfiguration, metricsSystem, kv);
+        EncryptedKeyValueStorage.create(secretKey, rocksDbConfiguration, metricsSystem, kv);
     return new KeyValueStorageProvider(encryptedKv);
   }
 }

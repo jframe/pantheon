@@ -17,6 +17,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static tech.pegasys.pantheon.controller.KeyPairUtil.loadKeyPair;
 
 import tech.pegasys.pantheon.config.GenesisConfigFile;
+import tech.pegasys.pantheon.crypto.AesEncryption;
 import tech.pegasys.pantheon.crypto.SECP256K1.KeyPair;
 import tech.pegasys.pantheon.ethereum.ProtocolContext;
 import tech.pegasys.pantheon.ethereum.blockcreation.MiningCoordinator;
@@ -55,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.OptionalLong;
+import javax.crypto.SecretKey;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -181,10 +183,19 @@ public abstract class PantheonControllerBuilder<C> {
 
     if (storageProvider == null && rocksDbConfiguration != null) {
       final boolean encryptionEnabled = rocksDbConfiguration.getEncryptionEnabled();
-      storageProvider =
-          encryptionEnabled
-              ? RocksDbStorageProvider.createEncrypted(rocksDbConfiguration, metricsSystem)
-              : RocksDbStorageProvider.create(rocksDbConfiguration, metricsSystem);
+      if (encryptionEnabled) {
+        final File encryptionKeyFile = rocksDbConfiguration.getEncryptionKey();
+        final File keyFile =
+            encryptionKeyFile != null
+                ? encryptionKeyFile
+                : AesEncryption.getDefaultKeyFile(dataDirectory);
+        final SecretKey secretKey =
+            keyFile.exists() ? AesEncryption.loadKey(keyFile) : AesEncryption.generateKey(keyFile);
+        storageProvider =
+            RocksDbStorageProvider.createEncrypted(secretKey, rocksDbConfiguration, metricsSystem);
+      } else {
+        storageProvider = RocksDbStorageProvider.create(rocksDbConfiguration, metricsSystem);
+      }
     }
 
     prepForBuild();

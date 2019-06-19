@@ -15,6 +15,10 @@ package tech.pegasys.pantheon.crypto;
 import tech.pegasys.pantheon.util.bytes.BytesValue;
 import tech.pegasys.pantheon.util.bytes.BytesValues;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -24,6 +28,7 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 public class AesEncryption {
   private final SecretKey key;
@@ -72,7 +77,31 @@ public class AesEncryption {
     return keyGenerator.generateKey();
   }
 
-  public static byte[] createIv() throws NoSuchAlgorithmException {
+  public static SecretKey loadKey(final File file) {
+    try {
+      final byte[] key = Files.readAllBytes(file.toPath());
+      return new SecretKeySpec(key, "AES");
+    } catch (IOException e) {
+      throw new IllegalStateException("Failed loading key", e);
+    }
+  }
+
+  public static SecretKey generateKey(final File file) {
+    final SecretKey key;
+    try {
+      key = createKey();
+      Files.write(file.toPath(), key.getEncoded());
+      return key;
+    } catch (NoSuchAlgorithmException | IOException e) {
+      throw new IllegalStateException("Failed creating key file", e);
+    }
+  }
+
+  public static File getDefaultKeyFile(final Path homeDirectory) {
+    return homeDirectory.resolve("rocksdb-key").toFile();
+  }
+
+  private byte[] createIv() throws NoSuchAlgorithmException {
     KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
     keyGenerator.init(8 * 16); // IV must be 16 bytes
     return keyGenerator.generateKey().getEncoded();
