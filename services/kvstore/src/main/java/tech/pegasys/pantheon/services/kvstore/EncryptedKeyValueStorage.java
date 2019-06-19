@@ -13,6 +13,7 @@
 package tech.pegasys.pantheon.services.kvstore;
 
 import tech.pegasys.pantheon.crypto.AesEncryption;
+import tech.pegasys.pantheon.crypto.AesEncryption.EncryptedData;
 import tech.pegasys.pantheon.metrics.MetricCategory;
 import tech.pegasys.pantheon.metrics.MetricsSystem;
 import tech.pegasys.pantheon.metrics.OperationTimer;
@@ -41,10 +42,9 @@ public class EncryptedKeyValueStorage implements KeyValueStorage, Closeable {
       final RocksDbConfiguration rocksDbConfiguration,
       final MetricsSystem metricsSystem,
       final KeyValueStorage keyValueStorage,
-      final SecretKey secretKey,
-      final byte[] iv) {
+      final SecretKey aesKey) {
     this.keyValueStorage = keyValueStorage;
-    this.aesEncryption = new AesEncryption(secretKey, iv);
+    this.aesEncryption = new AesEncryption(aesKey);
 
     final Statistics stats = new Statistics();
 
@@ -85,9 +85,8 @@ public class EncryptedKeyValueStorage implements KeyValueStorage, Closeable {
       throws StorageException {
     try {
       final SecretKey key = AesEncryption.createKey();
-      final byte[] iv = AesEncryption.createIv();
       return new EncryptedKeyValueStorage(
-          rocksDbConfiguration, metricsSystem, keyValueStorage, key, iv);
+          rocksDbConfiguration, metricsSystem, keyValueStorage, key);
     } catch (NoSuchAlgorithmException e) {
       throw new IllegalStateException("Error creating private key", e);
     }
@@ -96,9 +95,9 @@ public class EncryptedKeyValueStorage implements KeyValueStorage, Closeable {
   @Override
   public Optional<BytesValue> get(final BytesValue key) throws StorageException {
     try (final OperationTimer.TimingContext ignored = readLatency.startTimer()) {
-      final BytesValue decryptedKey = aesEncryption.decrypt(key);
-      final Optional<BytesValue> bytesValue = keyValueStorage.get(decryptedKey);
-      return bytesValue.map(aesEncryption::decrypt);
+      final Optional<BytesValue> bytesValue = keyValueStorage.get(key);
+      return bytesValue.map(
+          encryptedData -> aesEncryption.decrypt(EncryptedData.decode(encryptedData)));
     }
   }
 
@@ -126,17 +125,16 @@ public class EncryptedKeyValueStorage implements KeyValueStorage, Closeable {
     @Override
     protected void doPut(final BytesValue key, final BytesValue value) {
       try (final OperationTimer.TimingContext ignored = writeLatency.startTimer()) {
-        final BytesValue encryptedKey = aesEncryption.encrypt(key);
-        final BytesValue encryptedValue = aesEncryption.encrypt(value);
-        transaction.put(encryptedKey, encryptedValue);
+        final EncryptedData encryptedValue = aesEncryption.encrypt(value);
+        final BytesValue dataToStore = EncryptedData.encode(encryptedValue);
+        transaction.put(key, dataToStore);
       }
     }
 
     @Override
     protected void doRemove(final BytesValue key) {
       try (final OperationTimer.TimingContext ignored = removeLatency.startTimer()) {
-        final BytesValue encryptedKey = aesEncryption.encrypt(key);
-        transaction.remove(encryptedKey);
+        transaction.remove(key);
       }
     }
 

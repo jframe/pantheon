@@ -15,9 +15,10 @@ package tech.pegasys.pantheon.crypto;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import tech.pegasys.pantheon.crypto.AesEncryption.EncryptedData;
 import tech.pegasys.pantheon.util.bytes.BytesValue;
 
-import java.security.GeneralSecurityException;
+import java.security.NoSuchAlgorithmException;
 import javax.crypto.SecretKey;
 
 import org.junit.Test;
@@ -25,13 +26,12 @@ import org.junit.Test;
 public class AesEncryptionTest {
 
   @Test
-  public void encryptAndDecryptReturnsOriginalData() throws GeneralSecurityException {
-    final byte[] iv = AesEncryption.createIv();
+  public void encryptAndDecryptReturnsOriginalData() throws NoSuchAlgorithmException {
     final SecretKey key = AesEncryption.createKey();
     final BytesValue dataToEncrypt =
         BytesValue.wrap("0x01636861696e4865616448617368".getBytes(UTF_8));
-    final AesEncryption aesEncryption = new AesEncryption(key, iv);
-    final BytesValue encryptedData = aesEncryption.encrypt(dataToEncrypt);
+    final AesEncryption aesEncryption = new AesEncryption(key);
+    final EncryptedData encryptedData = aesEncryption.encrypt(dataToEncrypt);
     final BytesValue decryptedData = aesEncryption.decrypt(encryptedData);
     assertThat(decryptedData).isEqualTo(dataToEncrypt);
   }

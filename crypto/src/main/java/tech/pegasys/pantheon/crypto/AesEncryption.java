@@ -13,6 +13,7 @@
 package tech.pegasys.pantheon.crypto;
 
 import tech.pegasys.pantheon.util.bytes.BytesValue;
+import tech.pegasys.pantheon.util.bytes.BytesValues;
 
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
@@ -24,18 +25,11 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 public class AesEncryption {
-  private static final Logger LOG = LogManager.getLogger();
-  private final Cipher encryptCipher;
-  private final Cipher decryptCipher;
+  private final SecretKey key;
 
-  public AesEncryption(final SecretKey key, final byte[] iv) {
-    encryptCipher = createCipher(Cipher.ENCRYPT_MODE, key, iv);
-    decryptCipher = createCipher(Cipher.DECRYPT_MODE, key, iv);
-    LOG.debug("AES encryption cipher is using vendor {}", encryptCipher.getProvider().getName());
+  public AesEncryption(final SecretKey key) {
+    this.key = key;
   }
 
   private Cipher createCipher(final int encryptMode, final SecretKey key, final byte[] iv) {
@@ -51,17 +45,22 @@ public class AesEncryption {
     }
   }
 
-  public BytesValue encrypt(final BytesValue data) {
+  public EncryptedData encrypt(final BytesValue data) {
     try {
-      return BytesValue.wrap(encryptCipher.doFinal(data.extractArray()));
+      final byte[] iv = createIv();
+      final Cipher cipher = createCipher(Cipher.ENCRYPT_MODE, key, iv);
+      final BytesValue encryptedData = BytesValue.wrap(cipher.doFinal(data.extractArray()));
+      return new EncryptedData(encryptedData, BytesValue.wrap(iv));
     } catch (GeneralSecurityException e) {
       throw new IllegalStateException(e);
     }
   }
 
-  public BytesValue decrypt(final BytesValue data) {
+  public BytesValue decrypt(final EncryptedData encryptedData) {
     try {
-      return BytesValue.wrap(decryptCipher.doFinal(data.extractArray()));
+      final Cipher cipher =
+          createCipher(Cipher.DECRYPT_MODE, key, encryptedData.getIv().extractArray());
+      return BytesValue.wrap(cipher.doFinal(encryptedData.getData().extractArray()));
     } catch (GeneralSecurityException e) {
       throw new IllegalStateException(e);
     }
@@ -77,5 +76,34 @@ public class AesEncryption {
     KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
     keyGenerator.init(8 * 16); // IV must be 16 bytes
     return keyGenerator.generateKey().getEncoded();
+  }
+
+  public static class EncryptedData {
+
+    private final BytesValue data;
+    private final BytesValue iv;
+
+    EncryptedData(final BytesValue data, final BytesValue iv) {
+      this.data = data;
+      this.iv = iv;
+    }
+
+    public BytesValue getData() {
+      return data;
+    }
+
+    public BytesValue getIv() {
+      return iv;
+    }
+
+    public static BytesValue encode(final EncryptedData encryptedData) {
+      return BytesValues.concatenate(encryptedData.getIv(), encryptedData.getData());
+    }
+
+    public static EncryptedData decode(final BytesValue bytesValue) {
+      final BytesValue iv = bytesValue.slice(0, 16);
+      final BytesValue data = bytesValue.slice(16);
+      return new EncryptedData(data, iv);
+    }
   }
 }
