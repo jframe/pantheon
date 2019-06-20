@@ -23,6 +23,7 @@ import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.Provider;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
@@ -30,16 +31,29 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class AesEncryption {
+  private static final String AES_TRANSFORMATION = "AES/CTR/NoPadding";
   private final SecretKey key;
+  private static final Logger LOG = LogManager.getLogger();
 
   public AesEncryption(final SecretKey key) {
     this.key = key;
+    try {
+      final Cipher cipher = Cipher.getInstance(AES_TRANSFORMATION);
+      final Provider provider = cipher.getProvider();
+      LOG.info(
+          "Using AES encryption with {} provided by {}", provider.getInfo(), provider.getName());
+    } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+      throw new IllegalStateException(e);
+    }
   }
 
   private Cipher createCipher(final int encryptMode, final SecretKey key, final byte[] iv) {
     try {
-      final Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding");
+      final Cipher cipher = Cipher.getInstance(AES_TRANSFORMATION);
       cipher.init(encryptMode, key, new IvParameterSpec(iv));
       return cipher;
     } catch (NoSuchAlgorithmException
